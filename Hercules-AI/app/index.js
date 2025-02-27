@@ -1,5 +1,4 @@
 import { useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import { Text, View, Pressable } from 'react-native';
 
 export default function App() {

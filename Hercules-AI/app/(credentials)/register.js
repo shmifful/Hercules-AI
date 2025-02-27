@@ -16,6 +16,7 @@ const Register = () => {
         }
 
         try{
+            // Sending data to server to be verified
             const req = await fetch("http://10.0.2.2:5000/register", {
                 method: "POST",
                 headers: {
