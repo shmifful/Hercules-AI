@@ -32,7 +32,6 @@ const Login = () => {
     return (
     <View>
         <Text>Login</Text>
-        <TextInput onChangeText={setUsername} autoCapitalize="none" placeholder="username"/>
         <TextInput onChangeText={setEmail} autoCapitalize="none" placeholder="email" inputMode="email"/>
         <TextInput onChangeText={setPassword} autoCapitalize="none" placeholder="password" secureTextEntry={true} />
 

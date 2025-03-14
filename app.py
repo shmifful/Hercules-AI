@@ -16,10 +16,12 @@ def login():
         return jsonify({"success": True, "message": "GET WORKS!"})
     
     if request.method == "POST":
-        username = data.get("username")
         email = data.get("email")
         password = data.get("password")
-        print(username, email, password)
+        print(email, password)
+
+        if not email or not password:
+            return jsonify({"success": False, "message": "Email or password not provided"})
 
         # DB connection
         conn = sql.connect("sql.db")
@@ -27,12 +29,23 @@ def login():
         print("DB init...")
         try:
             # Check if user details are correct
-            query = f"SELECT username, email FROM users WHERE username='{username}' AND email='{email}' AND password='{password}'"
+            query = f"SELECT user_id, username FROM users where email={email} AND password={password}"
             cursor.execute(query)
-            out = cursor.fetchall()
-            for row in out:
-                print(row)
-            conn.commit()
+            user = cursor.fetchone()
+            
+            if user:
+                id, username = user
+                return jsonify({
+                    "success": True,
+                    "message": "Login successful!",
+                    "user": {
+                        "id": id, 
+                        "username": username
+                        } 
+                })
+            else:
+                # No matching user found
+                return jsonify({"success": False, "message": "Invalid email or password"}), 401
         except sql.IntegrityError:
             print("Something went wrong")
         finally:
@@ -43,12 +56,13 @@ def login():
 
 @app.route("/register", methods=["POST", "GET"])
 def register():
-    data = request.get_json() # Deconstruct the data received by the user
+    data = request.get_json() 
 
     if request.method == "GET":
         pass
 
     if request.method == "POST":
+        # Decomposing the data received by the user
         username = data.get("username")
         email = data.get("email")
         password = data.get("password")
