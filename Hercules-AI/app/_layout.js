@@ -15,6 +15,11 @@ const RootLayout = () => {
             headerShown: false
         }}
         />
+        <Stack.Screen name="(app)" 
+        options={{
+            headerShown: false
+        }}
+        />
     </Stack>
   );
 };

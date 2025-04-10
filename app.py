@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import sqlite3 as sql 
 import re
+from GenerateFirstWeek import GenerateWorkout 
 
 app = Flask(__name__)
 email_re = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
@@ -29,9 +30,10 @@ def login():
         print("DB init...")
         try:
             # Check if user details are correct
-            query = f"SELECT user_id, username FROM users where email={email} AND password={password}"
+            query = f"SELECT user_id, username FROM users where email='{email}' AND password='{password}'"
             cursor.execute(query)
             user = cursor.fetchone()
+            print(user)
             
             if user:
                 id, username = user
@@ -54,12 +56,9 @@ def login():
 
         return jsonify({"success": True, "message": "Login data received"})
 
-@app.route("/register", methods=["POST", "GET"])
+@app.route("/register", methods=["POST"])
 def register():
     data = request.get_json() 
-
-    if request.method == "GET":
-        pass
 
     if request.method == "POST":
         # Decomposing the data received by the user
@@ -67,6 +66,8 @@ def register():
         email = data.get("email")
         password = data.get("password")
         cpass = data.get("confirmPassword")
+        days = data.get("days")
+        goal = data.get("goal")
 
         # Verying details entered by user is valid
         if not re.fullmatch(email_re, email):
@@ -82,20 +83,37 @@ def register():
         print("DB init...")
         try:
             # Inserting user data and closing the connection
-            query = f"INSERT INTO users (username, email, password) VALUES ('{username}', '{email}', '{password}')"
+            query = f"INSERT INTO users (username, email, password, days, goal) VALUES ('{username}', '{email}', '{password}', '{days}', '{goal}')"
             cursor.execute(query)
             conn.commit()
-            print(username, email, password, cpass)
-            return jsonify({"success": True, "message": "User registered!"})
+            print(username, email, password, cpass, days, goal)
+
+            query = f"SELECT user_id, username FROM users where email='{email}' AND password='{password}'"
+            cursor.execute(query)
+            user = cursor.fetchone()
+            id, username = user
+
+            conn.close()
+            return jsonify({"success": True, "message": "User registered!", "user":{"id":id, "username":username}})
         except sql.IntegrityError as e:
             error_msg = str(e)
             print(f"Database error: {error_msg}")
+            conn.close()
             if "UNIQUE constraint failed: users.email" in error_msg:
                 return jsonify({"success": False, "message": "Email already exists. Please use a different email."}), 400
             if "UNIQUE constraint failed: users.username" in error_msg:
                 return jsonify({"success": False, "message": "Username already in use. Please try a different username."}), 400
-        finally:
-            conn.close()
+
+@app.route("/generate", methods=["GET"])
+def generate_plan(days, goal):
+    data = request.get_json() 
+
+    if request.method == "GET": 
+        plan = GenerateWorkout.generate_workout_plan(days_per_week=days, goal=goal)
+        for day, exercises in plan.items():
+            print(f"\n{day}:")
+            for ex in exercises:
+                return f"- {ex['Exercise']}: {ex['Sets']} sets x {ex['Reps']} reps, Rest: {ex['Rest']}"
 
 if __name__ == "__main__":
     app.run(debug=True)

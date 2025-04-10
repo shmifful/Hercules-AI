@@ -1,6 +1,6 @@
 import { Stack } from "expo-router";
 
-const RootLayout = () => {
+const CredentialsLayout = () => {
   return (
     <Stack>
         <Stack.Screen name="login"/>
@@ -9,4 +9,4 @@ const RootLayout = () => {
   );
 };
 
-export default RootLayout;
+export default CredentialsLayout;
