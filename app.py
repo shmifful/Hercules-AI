@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import sqlite3 as sql 
 import re
+from datetime import datetime
 from GenerateFirstWeek import GenerateWorkout 
 
 app = Flask(__name__)
@@ -94,6 +95,7 @@ def register():
             id, username = user
 
             conn.close()
+            generate_plan(id, days, goal)
             return jsonify({"success": True, "message": "User registered!", "user":{"id":id, "username":username}})
         except sql.IntegrityError as e:
             error_msg = str(e)
@@ -104,16 +106,41 @@ def register():
             if "UNIQUE constraint failed: users.username" in error_msg:
                 return jsonify({"success": False, "message": "Username already in use. Please try a different username."}), 400
 
-@app.route("/generate", methods=["GET"])
-def generate_plan(days, goal):
-    data = request.get_json() 
+def generate_plan(id, days, goal):
+    date = datetime.today().strftime("%Y-%m-%d")
 
-    if request.method == "GET": 
+    # DB connection
+    conn = sql.connect("sql.db")
+    cursor = conn.cursor()
+    print("DB init...")
+
+    try:
+        # Inserting user data and closing the connection
+        plan_query = f"INSERT INTO workout_plans (user_id, created, completed) VALUES ('{id}', '{date}', 0)"
+        cursor.execute(plan_query)
+        conn.commit()
+
+        plan_id = cursor.lastrowid
+        
         plan = GenerateWorkout.generate_workout_plan(days_per_week=days, goal=goal)
         for day, exercises in plan.items():
-            print(f"\n{day}:")
+            day_query = f"INSERT INTO workout_days (plan_id, day_type) VALUES ('{plan_id}', '{day}')"
+            cursor.execute(day_query)
+            conn.commit()
+            day_id = cursor.lastrowid
+
             for ex in exercises:
-                return f"- {ex['Exercise']}: {ex['Sets']} sets x {ex['Reps']} reps, Rest: {ex['Rest']}"
+                day_query = f"INSERT INTO workout_exercises (day_id, exercise_title, sets, reps_suggested, rest) VALUES ({day_id},'{ex['Exercise']}', '{ex['Sets']}', '{ex['Reps']}', '{ex['Rest']}')"
+                cursor.execute(day_query)
+                conn.commit()
+
+        conn.close()
+    except sql.IntegrityError as e:
+        error_msg = str(e)
+        print(f"Database error: {error_msg}")
+        conn.close()
+
+    
 
 if __name__ == "__main__":
     app.run(debug=True)

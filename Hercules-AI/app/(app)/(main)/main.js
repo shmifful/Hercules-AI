@@ -10,15 +10,16 @@ export default function Main() {
     useEffect(() => {
         const checkLoggedInUser = async () => {
             try {
-                setUser(await AsyncStorage.getItem("user"));
-                console.log("Stored user:", user);
-                if (user) {
-                    console.log("Logged in");
-                    // You might want to parse it if it's JSON
-                    // const user = JSON.parse(loggedInUser);
-                }    
+                const storedUser = await AsyncStorage.getItem("user")
+                if (storedUser) {
+                    const parsedUser = JSON.parse(storedUser)
+                    setUser(parsedUser);
+                    console.log(user);
+                }   
             } catch (error) {
                 console.error("Error reading from AsyncStorage:", error);
+            }finally {
+                setLoading(false)
             }
         };
         
@@ -26,26 +27,21 @@ export default function Main() {
     }, []); // Add empty dependency array to run only once on mount
 
     const generate_plan = async () => {
-        console.log(user)
+        const data = {
+            username: user.username,
+            id: user.id
+        }
+
         try{
             // Sending data to server to be verified
             const req = await fetch("http://10.0.2.2:5000/generate", {
-                method: "GET",
+                method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify(data)
             })
 
-            const responseData = await req.json();
-            
-            if (responseData.success == false){
-                setErrorMessage(responseData.message)
-                Alert.alert("Error", errorMessage)
-            }else{
-                await AsyncStorage.setItem("user", JSON.stringify(responseData.user));
-                router.push("/main");
-            }
 
         } catch (err){
             console.log(err)
