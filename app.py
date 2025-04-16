@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 import sqlite3 as sql 
 import re
-from datetime import datetime
+from datetime import datetime, timedelta
 from GenerateFirstWeek import GenerateWorkout 
 
 app = Flask(__name__)
@@ -11,11 +11,9 @@ email_re = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
 def index():
     return "Hello world"
 
-@app.route("/login", methods=["POST", "GET"])
+@app.route("/login", methods=["POST"])
 def login():
     data = request.get_json() # Deconstruct the data received by the user
-    if request.method == "GET":
-        return jsonify({"success": True, "message": "GET WORKS!"})
     
     if request.method == "POST":
         email = data.get("email")
@@ -31,19 +29,20 @@ def login():
         print("DB init...")
         try:
             # Check if user details are correct
-            query = f"SELECT user_id, username FROM users where email='{email}' AND password='{password}'"
+            query = f"SELECT user_id, username, days FROM users where email='{email}' AND password='{password}'"
             cursor.execute(query)
             user = cursor.fetchone()
             print(user)
             
             if user:
-                id, username = user
+                id, username, days = user
                 return jsonify({
                     "success": True,
                     "message": "Login successful!",
                     "user": {
                         "id": id, 
-                        "username": username
+                        "username": username,
+                        "days": days
                         } 
                 })
             else:
@@ -96,7 +95,7 @@ def register():
 
             conn.close()
             generate_plan(id, days, goal)
-            return jsonify({"success": True, "message": "User registered!", "user":{"id":id, "username":username}})
+            return jsonify({"success": True, "message": "User registered!", "user":{"id":id, "username":username, "days":days}})
         except sql.IntegrityError as e:
             error_msg = str(e)
             print(f"Database error: {error_msg}")
@@ -107,7 +106,10 @@ def register():
                 return jsonify({"success": False, "message": "Username already in use. Please try a different username."}), 400
 
 def generate_plan(id, days, goal):
-    date = datetime.today().strftime("%Y-%m-%d")
+    # Calculate start of week (Monday)
+    today = datetime.today()
+    start_of_week = today - timedelta(days=today.weekday())
+    start_of_week = start_of_week.strftime("%Y-%m-%d")
 
     # DB connection
     conn = sql.connect("sql.db")
@@ -116,7 +118,7 @@ def generate_plan(id, days, goal):
 
     try:
         # Inserting user data and closing the connection
-        plan_query = f"INSERT INTO workout_plans (user_id, created, completed) VALUES ('{id}', '{date}', 0)"
+        plan_query = f"INSERT INTO workout_plans (user_id, start) VALUES ('{id}', '{start_of_week}')"
         cursor.execute(plan_query)
         conn.commit()
 
@@ -124,7 +126,7 @@ def generate_plan(id, days, goal):
         
         plan = GenerateWorkout.generate_workout_plan(days_per_week=days, goal=goal)
         for day, exercises in plan.items():
-            day_query = f"INSERT INTO workout_days (plan_id, day_type) VALUES ('{plan_id}', '{day}')"
+            day_query = f"INSERT INTO workout_days (plan_id, day_type, completed) VALUES ('{plan_id}', '{day}', 0)"
             cursor.execute(day_query)
             conn.commit()
             day_id = cursor.lastrowid
@@ -140,7 +142,59 @@ def generate_plan(id, days, goal):
         print(f"Database error: {error_msg}")
         conn.close()
 
-    
+@app.route("/get_workouts", methods=["POST"])
+def get_workouts():
+    data = request.get_json() # Deconstruct the data received by the user
+
+    if request.method == "POST":
+        id = data.get("id")
+
+        # DB connection
+        conn = sql.connect("sql.db")
+        cursor = conn.cursor()
+        print("DB init...")
+        try:
+            today = datetime.today()
+        
+            # Calculate start of week (Monday)
+            start_of_week = today - timedelta(days=today.weekday())
+            
+            # Calculate end of week (Sunday)
+            end_of_week = start_of_week + timedelta(days=6)
+
+            start_of_week = start_of_week.strftime("%Y-%m-%d")
+            end_of_week =  end_of_week.strftime("%Y-%m-%d")
+            
+            # Check if user details are correct
+            plan_query = f"SELECT plan_id FROM workout_plans WHERE start>='{start_of_week}' AND start<='{end_of_week}' AND user_id='{id}'"
+            cursor.execute(plan_query)
+            plan = cursor.fetchone()
+            print(plan)
+
+            days_query = f"SELECT day_id, day_type, completed FROM workout_days WHERE plan_id={plan[0]}"
+            cursor.execute(days_query)
+            days = cursor.fetchall()
+            print(days)
+
+            send_data = {}
+            
+            if days:
+                for d in days:
+                    day_id, title, completed = d
+                    send_data[title] = {
+                        "day_id": day_id,
+                        "completed": completed
+                    }
+                return jsonify(send_data)
+            else:
+                # No matching user found
+                return jsonify({"success": False, "message": "Invalid email or password"}), 401
+        except sql.IntegrityError:
+            print("Something went wrong")
+        finally:
+            conn.close()
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

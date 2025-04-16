@@ -7,6 +7,7 @@ const MainLayout = () => {
         options={{
             headerShown:false
         }}/>
+        <Stack.Screen name="[id]"/>
     </Stack>
   );
 };

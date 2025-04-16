@@ -5,15 +5,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Login = () => {
     const router = useRouter();
-
-    const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("Incomplete fields.");
 
     const handleSubmit = async() => {
         const data = {
-            username, username,
             email: email,
             password: password
         }
