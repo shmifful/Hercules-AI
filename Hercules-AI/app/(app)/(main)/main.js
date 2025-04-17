@@ -71,16 +71,18 @@ export default function Main() {
             {workoutDays.map((dayName, index) => (
                 <Pressable 
                     key={index}
-                    style={({ pressed }) => ({
-                        backgroundColor: pressed ? '#ddd' : '#f0f0f0',
+                    style={{
+                        backgroundColor: workouts[dayName].completed === 0 ? '#f0f0f0' : '#f00',
                         padding: 15,
                         marginBottom: 10,
                         borderRadius: 5
-                    })}
+                    }}
                     onPress={() => {
                         const dayData = workouts[dayName];
-                        router.push({pathname:"[id]",
-                            params: dayData
+                        router.push({
+                            pathname:"[id]",
+                            params: {dayName: dayName,
+                                dayData: JSON.stringify(dayData)},
                         })
                     }}
                 >

@@ -32,10 +32,10 @@ class GenerateWorkout:
 
     # Define primary exercises for each movement pattern
     primary_exercises = {
-        'push': df[df["Movement"]=="push"].sort_values("Rating", ascending=False).head(10)["Title"].to_list(),
-        'pull': df[df["Movement"]=="pull"].sort_values("Rating", ascending=False).head(10)["Title"].to_list(),
-        'legs': df[df["Movement"]=="legs"].sort_values("Rating", ascending=False).head(10)["Title"].to_list(),
-        'core': df[df["Movement"]=="core"].sort_values("Rating", ascending=False).head(10)["Title"].to_list()
+        'push': df[df["Movement"]=="push"].sort_values("Rating", ascending=False).head(15)["Title"].to_list(),
+        'pull': df[df["Movement"]=="pull"].sort_values("Rating", ascending=False).head(15)["Title"].to_list(),
+        'legs': df[df["Movement"]=="legs"].sort_values("Rating", ascending=False).head(15)["Title"].to_list(),
+        'core': df[df["Movement"]=="core"].sort_values("Rating", ascending=False).head(15)["Title"].to_list()
     }
 
     @classmethod
@@ -116,7 +116,7 @@ class GenerateWorkout:
                     })
             elif day_type in ['Push', 'Pull', 'Legs']:
                 movement = day_type.lower()
-                for _ in range(4):  # 4 exercises per focused day
+                for _ in range(0, 4):  # 4 exercises per focused day
                     primary = random.choice(cls.primary_exercises[movement])
                     recs = cls.get_recommendations(primary)
                     exercise = recs['Title']
@@ -127,6 +127,6 @@ class GenerateWorkout:
                         'Rest': rest
                     })
             
-            workout_plan[f'Day {day_num} ({day_type})'] = exercises
+            workout_plan[f'({day_type}) day'] = exercises
         
         return workout_plan

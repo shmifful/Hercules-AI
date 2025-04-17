@@ -175,24 +175,56 @@ def get_workouts():
             cursor.execute(days_query)
             days = cursor.fetchall()
             print(days)
-
             send_data = {}
             
-            if days:
-                for d in days:
-                    day_id, title, completed = d
-                    send_data[title] = {
-                        "day_id": day_id,
-                        "completed": completed
-                    }
-                return jsonify(send_data)
-            else:
-                # No matching user found
-                return jsonify({"success": False, "message": "Invalid email or password"}), 401
+            
+            for d in days:
+                day_id, title, completed = d
+                send_data[title] = {
+                    "day_id": day_id,
+                    "completed": completed
+                }
+            return jsonify(send_data)
         except sql.IntegrityError:
             print("Something went wrong")
         finally:
             conn.close()
+
+@app.route("/get_exercises", methods=["POST"])
+def get_exercises():
+    data = request.get_json()
+
+    if request.method == "POST":
+        id = data.get("id")
+        print(id)
+
+        # DB connection
+        conn = sql.connect("sql.db")
+        cursor = conn.cursor()
+        print("DB init...")
+        try:
+            # Check if user details are correct
+            exercises_query = f"SELECT exercise_title, sets, reps_suggested, rest FROM workout_exercises WHERE day_id={id}"
+            cursor.execute(exercises_query)
+            exercises = cursor.fetchall()
+            print(exercises)
+
+            send_data = {}
+
+            for ex in exercises:
+                title, sets, reps, rest = ex
+                send_data[title] = {
+                    "sets": sets,
+                    "reps": reps,
+                    "rest": rest
+                }
+            
+            return jsonify(send_data)
+        except sql.IntegrityError:
+            print("Something went wrong")
+        finally:
+            conn.close()
+
 
 
 
