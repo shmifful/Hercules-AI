@@ -10,6 +10,7 @@ export default function Workout() {
     const {dayName, dayData} = useLocalSearchParams();
     const [exercises, setExercises] = useState([]);
     const [editedExercises, setEditedExercises] = useState({});
+    const [userID, setUserID] = useState(null);
     const day_id = JSON.parse(dayData).day_id;
 
     useEffect( () => {
@@ -23,6 +24,7 @@ export default function Workout() {
                 const storedUser = await AsyncStorage.getItem("user");
                 if (storedUser) {
                     const parsedUser = JSON.parse(storedUser);
+                    setUserID(parsedUser.id)
                     try {
                         const req = await fetch("http://10.0.2.2:5000/get_exercises", {
                             method: "POST",
@@ -60,6 +62,53 @@ export default function Workout() {
         setEditedExercises(prev => ({
             ...prev, [index]: Number(value) || 0
         }))
+    }
+
+    const handleStart = () => {
+        const errors = new Set();
+    
+    exercises.forEach((ex, index) => {
+        // Check edited values first
+        const editedValue = editedExercises[index];
+        if (editedValue !== undefined) {
+            if (editedValue === 0) {
+                errors.add(ex.name);
+            }
+        }
+        // Fallback to original value if not edited
+        else if (ex.one_rm === 0) {
+            errors.add(ex.name);
+        }
+    });
+
+        if (errors.size > 0) {
+            Alert.alert("1RM Error",`Please enter your 1RM for:\n- ${Array.from(errors).join('\n- ')}`);
+            return;
+        }
+    
+        // Update 1RM if changed
+        if (Object.keys(editedExercises > 0)){
+            exercises.forEach(async (ex, index) =>{
+                if (editedExercises[index] > ex.one_rm){
+                    try {
+                        const req = await fetch("http://10.0.2.2:5000/update_one_rm", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                            },
+                            body: JSON.stringify({"id": ex.id, "exercise_name": ex.name, "new_one_rm": editedExercises[index]})
+                        });
+        
+                        const responseData = await req.json();
+                        console.log(responseData)
+                    }
+                    catch (err) {
+                        console.log("Fetch error:", err);
+                        Alert.alert("Error", "Failed to update 1RM");
+                    }
+                }
+            })
+        }
     }
 
     return (
@@ -105,7 +154,7 @@ export default function Workout() {
         </View>
     ))}
 
-    <Pressable><Text>START</Text></Pressable>
+    <Pressable onPress={handleStart}><Text>START</Text></Pressable>
 </View>
     );
 }

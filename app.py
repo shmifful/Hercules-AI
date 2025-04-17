@@ -204,7 +204,7 @@ def get_exercises():
         print("DB init...")
         try:
             # Check if user details are correct
-            exercises_query = f"SELECT exercise_title, sets, reps_suggested, rest FROM workout_exercises WHERE day_id={id}"
+            exercises_query = f"SELECT exercise_id, exercise_title, sets, reps_suggested, rest FROM workout_exercises WHERE day_id={id}"
             cursor.execute(exercises_query)
             exercises = cursor.fetchall()
             print(exercises)
@@ -212,10 +212,11 @@ def get_exercises():
             send_data = {}
 
             for ex in exercises:
-                title, sets, reps, rest = ex
+                ex_id, title, sets, reps, rest = ex
                 one_rm = get_max_one_rm(user_id, title)
                 print(one_rm)
                 send_data[title] = {
+                    "id": ex_id,
                     "sets": sets,
                     "reps": reps,
                     "rest": rest,
@@ -249,6 +250,36 @@ def get_max_one_rm(user_id, exercise_name):
     finally:
         if conn:
             conn.close()
+
+@app.route("/update_one_rm", methods=["POST"])
+def update_one_rm():
+    data = request.get_json()
+
+    if request.method == "POST":
+        id = data.get("id")
+        ex_name = data.get("exercise_name")
+        one_rm = data.get("new_one_rm")
+
+        conn = sql.connect("sql.db")
+        cursor = conn.cursor()
+        print(id, ex_name, one_rm)
+        try:
+            cursor = conn.cursor()
+            
+            # Execute the query
+            query = f"UPDATE workout_exercises SET one_rm={int(one_rm)} WHERE exercise_id={id} AND exercise_title='{ex_name}'"
+
+            cursor.execute(query)
+            conn.commit()
+
+            return jsonify({"success": True})
+            
+        except sql.Error as e:
+            print(f"Database error: {e}")
+            return jsonify({"success": False})
+        finally:
+            if conn:
+                conn.close()
 
 if __name__ == "__main__":
     app.run(debug=True)
