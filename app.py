@@ -177,7 +177,6 @@ def get_workouts():
             print(days)
             send_data = {}
             
-            
             for d in days:
                 day_id, title, completed = d
                 send_data[title] = {
@@ -196,6 +195,7 @@ def get_exercises():
 
     if request.method == "POST":
         id = data.get("id")
+        user_id = data.get("user_id")
         print(id)
 
         # DB connection
@@ -213,10 +213,13 @@ def get_exercises():
 
             for ex in exercises:
                 title, sets, reps, rest = ex
+                one_rm = get_max_one_rm(user_id, title)
+                print(one_rm)
                 send_data[title] = {
                     "sets": sets,
                     "reps": reps,
-                    "rest": rest
+                    "rest": rest,
+                    "one_rm": one_rm if one_rm != None else 0
                 }
             
             return jsonify(send_data)
@@ -225,8 +228,27 @@ def get_exercises():
         finally:
             conn.close()
 
-
-
+def get_max_one_rm(user_id, exercise_name):
+    conn = sql.connect("sql.db")
+    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
+        
+        # Execute the query
+        query = f"SELECT MAX(we.one_rm) as max_one_rm FROM workout_exercises we JOIN workout_days wd ON we.day_id = wd.day_id JOIN workout_plans wp ON wd.plan_id = wp.plan_id WHERE wp.user_id = {user_id} AND we.exercise_title = '{exercise_name}' AND we.one_rm IS NOT NULL"
+        
+        cursor.execute(query)
+        result = cursor.fetchone()
+        
+        # Return the max one_rm or None if no records found
+        return result[0] if result and result[0] is not None else None
+        
+    except sql.Error as e:
+        print(f"Database error: {e}")
+        return None
+    finally:
+        if conn:
+            conn.close()
 
 if __name__ == "__main__":
     app.run(debug=True)
