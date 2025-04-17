@@ -8,6 +8,10 @@ const MainLayout = () => {
             headerShown:false
         }}/>
         <Stack.Screen name="[id]"/>
+        <Stack.Screen name="workout"
+        options={{
+          headerShown:false
+        }}/>
     </Stack>
   );
 };

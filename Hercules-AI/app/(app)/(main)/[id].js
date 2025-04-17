@@ -67,7 +67,7 @@ export default function Workout() {
     const handleStart = () => {
         const errors = new Set();
     
-    exercises.forEach((ex, index) => {
+        exercises.forEach((ex, index) => {
         // Check edited values first
         const editedValue = editedExercises[index];
         if (editedValue !== undefined) {
@@ -79,7 +79,7 @@ export default function Workout() {
         else if (ex.one_rm === 0) {
             errors.add(ex.name);
         }
-    });
+        });
 
         if (errors.size > 0) {
             Alert.alert("1RM Error",`Please enter your 1RM for:\n- ${Array.from(errors).join('\n- ')}`);
@@ -101,6 +101,7 @@ export default function Workout() {
         
                         const responseData = await req.json();
                         console.log(responseData)
+                        router.push("/workout")
                     }
                     catch (err) {
                         console.log("Fetch error:", err);
@@ -108,7 +109,11 @@ export default function Workout() {
                     }
                 }
             })
+        }else{
+            console.log(1)
+            router.push("/workout")
         }
+        
     }
 
     return (
