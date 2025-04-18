@@ -130,3 +130,7 @@ class GenerateWorkout:
             workout_plan[f'({day_type}) day'] = exercises
         
         return workout_plan
+    
+    @classmethod
+    def getExDesc(cls, ex):
+        return cls.df.loc[cls.df["Title"] == ex]["Desc"].values.item()

@@ -64,7 +64,7 @@ export default function Workout() {
         }))
     }
 
-    const handleStart = () => {
+    const handleStart = async () => {
         const errors = new Set();
     
         exercises.forEach((ex, index) => {
@@ -101,7 +101,6 @@ export default function Workout() {
         
                         const responseData = await req.json();
                         console.log(responseData)
-                        router.push("/workout")
                     }
                     catch (err) {
                         console.log("Fetch error:", err);
@@ -109,10 +108,21 @@ export default function Workout() {
                     }
                 }
             })
-        }else{
-            console.log(1)
-            router.push("/workout")
         }
+
+        router.replace({
+            pathname: "/workout", 
+            params: {
+                exercises: JSON.stringify(
+                    exercises.map((ex, index) => ({
+                        ...ex,
+                        one_rm: editedExercises[index] !== undefined 
+                            ? editedExercises[index] 
+                            : ex.one_rm
+                    }))
+                )
+            }
+        });
         
     }
 
@@ -159,7 +169,7 @@ export default function Workout() {
         </View>
     ))}
 
-    <Pressable onPress={handleStart}><Text>START</Text></Pressable>
+    <Pressable onPress={() => handleStart()}><Text>START</Text></Pressable>
 </View>
     );
 }

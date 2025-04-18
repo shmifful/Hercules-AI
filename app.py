@@ -3,6 +3,7 @@ import sqlite3 as sql
 import re
 from datetime import datetime, timedelta
 from GenerateFirstWeek import GenerateWorkout 
+import urllib.parse
 
 app = Flask(__name__)
 email_re = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
@@ -280,6 +281,22 @@ def update_one_rm():
         finally:
             if conn:
                 conn.close()
+
+@app.route("/get_exercise_description", methods=["GET"])
+def get_exercise_description():
+    if request.method == "GET":
+        ex = request.args.get("exercise")
+    
+        if not ex:
+            return jsonify({"error": "Exercise parameter missing"}), 400
+        
+        description = GenerateWorkout.getExDesc(ex)
+        print(description)
+        
+        return jsonify({
+            "description": description
+        })
+            
 
 if __name__ == "__main__":
     app.run(debug=True)
