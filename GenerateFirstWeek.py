@@ -44,11 +44,10 @@ class GenerateWorkout:
         idx = cls.indices[title]
         sim_scores = list(enumerate(similarity_matrix[idx]))
         sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        top_indices = [i[0] for i in sim_scores[1:num_recommend+1]]
         return cls.df.iloc[random.choice(sim_scores[:10])[0]]
 
     @classmethod
-    def generate_workout_plan(cls, days_per_week, goal):
+    def generate_workout_plan(cls, days_per_week, goal, level):
         # Determine workout split
         if days_per_week == 3:
             split = ['Full-Body'] * 3
@@ -127,7 +126,7 @@ class GenerateWorkout:
                         'Rest': rest
                     })
             
-            workout_plan[f'({day_type}) day'] = exercises
+            workout_plan[f'{day_type} day'] = exercises
         
         return workout_plan
     

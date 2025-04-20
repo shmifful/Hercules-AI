@@ -69,6 +69,7 @@ def register():
         cpass = data.get("confirmPassword")
         days = data.get("days")
         goal = data.get("goal")
+        level = data.get("level")
 
         # Verying details entered by user is valid
         if not re.fullmatch(email_re, email):
@@ -95,7 +96,7 @@ def register():
             id, username = user
 
             conn.close()
-            generate_plan(id, days, goal)
+            generate_plan(id, days, goal, level)
             return jsonify({"success": True, "message": "User registered!", "user":{"id":id, "username":username, "days":days}})
         except sql.IntegrityError as e:
             error_msg = str(e)
@@ -106,7 +107,7 @@ def register():
             if "UNIQUE constraint failed: users.username" in error_msg:
                 return jsonify({"success": False, "message": "Username already in use. Please try a different username."}), 400
 
-def generate_plan(id, days, goal):
+def generate_plan(id, days, goal, level):
     # Calculate start of week (Monday)
     today = datetime.today()
     start_of_week = today - timedelta(days=today.weekday())
@@ -125,7 +126,7 @@ def generate_plan(id, days, goal):
 
         plan_id = cursor.lastrowid
         
-        plan = GenerateWorkout.generate_workout_plan(days_per_week=days, goal=goal)
+        plan = GenerateWorkout.generate_workout_plan(days_per_week=days, goal=goal, level=level)
         for day, exercises in plan.items():
             day_query = f"INSERT INTO workout_days (plan_id, day_type, completed) VALUES ('{plan_id}', '{day}', 0)"
             cursor.execute(day_query)
@@ -296,6 +297,16 @@ def get_exercise_description():
         return jsonify({
             "description": description
         })
+    
+@app.route("/rating/<int:id>", methods=["PUT"])
+def put_rating(id):
+    data = request.get_json()
+
+    if request.method == "PUT":
+        print(data)
+        print(id)
+
+        return jsonify({"success": True})
             
 
 if __name__ == "__main__":

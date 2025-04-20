@@ -14,6 +14,7 @@ const Register = () => {
     const [errorMessage, setErrorMessage] = useState("Incomplete fields.");
     const [days, setDays] = useState(3)
     const [goal, setGoal] = useState("Strength")
+    const [level, setLevel] = useState("Beginner");
 
     const handleSubmit = async() => {
         const data = {
@@ -22,7 +23,8 @@ const Register = () => {
             password: password,
             confirmPassword: confirmPassword,
             days: parseInt(days),
-            goal: goal
+            goal: goal,
+            level: level
         }
 
         try{
@@ -63,6 +65,12 @@ const Register = () => {
         { label: 'Endurance', value: 'Endurance' },
     ];
 
+    const levelData = [
+        { label: "Beginner", value: "Beginner"},
+        { label: "Intermediate", value: "Intermediate"},
+        { label: "Advanced", value: "Advanced"},
+    ]
+
     return (
     <View>
         <Text>REGISTER</Text>
@@ -92,6 +100,19 @@ const Register = () => {
             valueField="value"
             onChange={item => {
                 setGoal(item.value);
+              }}
+        />
+
+        <Text>What is your fintness level?</Text>
+        <Dropdown
+            data={levelData}
+            maxHeight={300}
+            placeholder={level}
+            value={level}
+            labelField="label"
+            valueField="value"
+            onChange={item => {
+                setLevel(item.value);
               }}
         />
 
