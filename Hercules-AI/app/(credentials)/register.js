@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { View, Text, TextInput, Pressable, Alert, StyleSheet } from 'react-native';
-import { Dropdown } from 'react-native-element-dropdown';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { useState } from "react";
+import { View, Text, TextInput, Pressable, Alert, StyleSheet } from "react-native";
+import { Dropdown } from "react-native-element-dropdown";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 const Register = () => {
     const router = useRouter();
@@ -57,17 +57,17 @@ const Register = () => {
     }
 
     const daysData = [
-        { label: '3 days per week', value: '3' },
-        { label: '4 days per week', value: '4' },
-        { label: '5 days per week', value: '5' },
-        { label: '6 days per week', value: '6' },
+        { label: "3 days per week", value: "3" },
+        { label: "4 days per week", value: "4" },
+        { label: "5 days per week", value: "5" },
+        { label: "6 days per week", value: "6" },
     ];
 
 
     const goalsData = [
-        { label: '💪 Strength', value: 'Strength' },
-        { label: '🏋️ Hypertrophy (Muscle growth)', value: 'Hypertrophy' },
-        { label: '🏃 Endurance', value: 'Endurance' },
+        { label: "💪 Strength", value: "Strength" },
+        { label: "🏋️ Hypertrophy (Muscle growth)", value: "Hypertrophy" },
+        { label: "🏃 Endurance", value: "Endurance" },
     ];
 
     const levelData = [
@@ -168,7 +168,7 @@ const Register = () => {
 
 const styles = StyleSheet.create({
     formContainer: {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: "#FFFFFF",
         marginHorizontal: 20,
         marginVertical: 24,
         padding: 25,
@@ -178,20 +178,20 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 28,
-        fontWeight: 'bold',
-        color: '#333',
+        fontWeight: "bold",
+        color: "#333",
         marginBottom: 5,
-        textAlign: 'center',
+        textAlign: "center",
     },
     inputContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: "#ddd",
         borderRadius: 8,
         marginBottom: 15,
         paddingHorizontal: 10,
-        backgroundColor: '#fff',
+        backgroundColor: "#fff",
     },
     icon: {
         marginRight: 10,
@@ -199,12 +199,12 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         height: 50,
-        color: '#333',
+        color: "#333",
     },
     sectionTitle: {
         fontSize: 18,
-        fontWeight: '600',
-        color: '#333',
+        fontWeight: "600",
+        color: "#333",
         marginTop: 20,
         marginBottom: 10,
     },
@@ -213,39 +213,39 @@ const styles = StyleSheet.create({
     },
     dropdownLabel: {
         fontSize: 14,
-        color: '#666',
+        color: "#666",
         marginBottom: 5,
     },
     dropdown: {
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: "#ddd",
         borderRadius: 8,
         paddingHorizontal: 15,
         paddingVertical: 12,
-        backgroundColor: '#fff',
+        backgroundColor: "#fff",
     },
     button: {
-        backgroundColor: '#008080',
+        backgroundColor: "#008080",
         padding: 15,
         borderRadius: 8,
-        alignItems: 'center',
+        alignItems: "center",
         marginTop: 20,
     },
     buttonText: {
-        color: 'white',
-        fontWeight: 'bold',
+        color: "white",
+        fontWeight: "bold",
         fontSize: 16,
     },
     linkContainer: {
         marginTop: 20,
     },
     linkText: {
-        textAlign: 'center',
-        color: '#666',
+        textAlign: "center",
+        color: "#666",
     },
     link: {
-        color: '#008080',
-        fontWeight: 'bold',
+        color: "#008080",
+        fontWeight: "bold",
     },
 });
 

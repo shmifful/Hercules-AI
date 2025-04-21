@@ -1,5 +1,5 @@
 import { Tabs } from "expo-router";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 
 const AppLayout = () => {
   return (
@@ -10,7 +10,7 @@ const AppLayout = () => {
         headerShown: false,
         tabBarIcon: ({ color, size, focused }) => (
           <Ionicons 
-            name={focused ? 'home' : 'home-outline'} 
+            name={focused ? "home" : "home-outline"} 
             size={size} 
             color={color} 
           />)
@@ -22,7 +22,7 @@ const AppLayout = () => {
         headerShown: false,
         tabBarIcon: ({ color, size, focused }) => (
             <Ionicons 
-              name={focused ? 'settings' : 'settings-outline'} 
+              name={focused ? "settings" : "settings-outline"} 
               size={size} 
               color={color} 
             />)

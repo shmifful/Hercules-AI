@@ -3,6 +3,7 @@ import sqlite3 as sql
 import re
 from datetime import datetime, timedelta
 from GenerateWorkout import GenerateWorkout 
+import click
 
 app = Flask(__name__)
 email_re = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
@@ -128,6 +129,7 @@ def generate_plan(id, days, goal, level):
         
         plan = GenerateWorkout.generate_first_week_plan(days_per_week=days, goal=goal, level=level)
         for day, exercises in plan.items():
+            # Inserting day type
             day_query = f"INSERT INTO workout_days (plan_id, day_type, completed) VALUES ('{plan_id}', '{day}', 0)"
             print(day_query)
             cursor.execute(day_query)
@@ -135,6 +137,7 @@ def generate_plan(id, days, goal, level):
             day_id = cursor.lastrowid
 
             for ex in exercises:
+                # Inserting exercises generated in the database
                 day_query = f"INSERT INTO workout_exercises (day_id, exercise_title, sets, reps_suggested, rest) VALUES ({day_id},'{ex['Exercise']}', '{ex['Sets']}', '{ex['Reps']}', '{ex['Rest']}')"
                 cursor.execute(day_query)
                 conn.commit()
@@ -151,6 +154,9 @@ def get_workouts():
 
     if request.method == "POST":
         id = data.get("id")
+
+        # fill any holes
+        fill_missing_days(id)
 
         # DB connection
         conn = sql.connect("sql.db")
@@ -192,6 +198,23 @@ def get_workouts():
         finally:
             conn.close()
 
+@click.argument("fill")
+def fill_missing_days(id):
+    conn = sql.connect("sql.db")
+    cursor = conn.cursor()
+    print("DB init...")
+    try:
+        # Check if user details are correct
+        exercises_query = f"SELECT * FROM workout_plans WHERE user_id={id}"
+        cursor.execute(exercises_query)
+        exercises = cursor.fetchall()
+        print(exercises)
+
+    except sql.IntegrityError:
+        print("Something went wrong")
+    finally:
+        conn.close()
+
 @app.route("/get_exercises", methods=["POST"])
 def get_exercises():
     data = request.get_json()
@@ -213,7 +236,8 @@ def get_exercises():
             print(exercises)
 
             send_data = {}
-
+            
+            # Formatting exercises to send
             for ex in exercises:
                 ex_id, title, sets, reps, rest = ex
                 one_rm = get_max_one_rm(user_id, title)
@@ -238,7 +262,7 @@ def get_max_one_rm(user_id, exercise_name):
     try:
         cursor = conn.cursor()
         
-        # Execute the query
+        # Get one_rm for a workout
         query = f"SELECT MAX(we.one_rm) as max_one_rm FROM workout_exercises we JOIN workout_days wd ON we.day_id = wd.day_id JOIN workout_plans wp ON wd.plan_id = wp.plan_id WHERE wp.user_id = {user_id} AND we.exercise_title = '{exercise_name}' AND we.one_rm IS NOT NULL"
         
         cursor.execute(query)
@@ -269,7 +293,7 @@ def update_one_rm():
         try:
             cursor = conn.cursor()
             
-            # Execute the query
+            # Update the one rep max for an exercise
             query = f"UPDATE workout_exercises SET one_rm={int(one_rm)} WHERE exercise_id={id} AND exercise_title='{ex_name}'"
 
             cursor.execute(query)
@@ -335,8 +359,6 @@ def completed():
         id = data.get("day_id")
         conn = sql.connect("sql.db")
         cursor = conn.cursor()
-
-        print(id)
         try:
             cursor = conn.cursor()
             
@@ -375,10 +397,8 @@ def generate_next_workout(day_id):
         user = cursor.fetchone()
         user_id, goal, level = user
 
-        # 1) Try to insert:
         cursor.execute(f"INSERT INTO workout_plans (user_id, start) SELECT {user_id}, date('now', '+7 days') WHERE NOT EXISTS (SELECT 1 FROM workout_plans WHERE user_id = {user_id} AND start   = date('now', 'weekday 1', '+7 days'))")
 
-    # 2) Grab the plan_id
         cursor.execute(f"SELECT plan_id FROM workout_plans WHERE user_id = {user_id} AND start   = date('now', 'weekday 1', '+7 days')")
         plan_id = cursor.fetchone()[0]
 
@@ -418,8 +438,6 @@ def generate_next_workout(day_id):
     finally:
         if conn:
             conn.close()
-
-            
 
 if __name__ == "__main__":
     app.run(debug=True)

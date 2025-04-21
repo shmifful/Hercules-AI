@@ -1,7 +1,7 @@
-import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { Text, View, Pressable, Alert, StyleSheet } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { Text, View, Pressable, Alert, StyleSheet } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Main() {
     const router = useRouter();
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
     },
     username: {
         fontSize: 28,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         marginBottom: 10,
     },
     planText: {
@@ -120,31 +120,31 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     dayCard: {
-        flexDirection: 'row',
-        alignItems: 'center',
+        flexDirection: "row",
+        alignItems: "center",
         padding: 20,
         marginBottom: 15,
         borderRadius: 12,
-        shadowColor: '#000',
+        shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 4,
         elevation: 3,
     },
     dayIncomplete: {
-        backgroundColor: '#ffffff',
+        backgroundColor: "#ffffff",
     },
     dayComplete: {
-        backgroundColor: '#008080',
+        backgroundColor: "#008080",
     },
     dayText: {
         marginLeft: 15,
         fontSize: 18,
-        fontWeight: '600',
+        fontWeight: "600",
         flex: 1,
-        color: '#333',
+        color: "#333",
     },
     completedDayText: {
-        color: 'white',
+        color: "white",
     },
 });

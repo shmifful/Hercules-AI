@@ -1,9 +1,9 @@
-import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
-import { useEffect } from 'react';
-import { Pressable, Text, View, Alert, TextInput, StyleSheet, ScrollView } from 'react-native';
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { useEffect } from "react";
+import { Pressable, Text, View, Alert, TextInput, StyleSheet, ScrollView } from "react-native";
 import { useState } from "react";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Workout() {
     const router = useRouter();
@@ -83,7 +83,7 @@ export default function Workout() {
         });
 
         if (errors.size > 0) {
-            Alert.alert("1RM Error",`Please enter your 1RM for:\n- ${Array.from(errors).join('\n- ')}`);
+            Alert.alert("1RM Error",`Please enter your 1RM for:\n- ${Array.from(errors).join("\n- ")}`);
             return;
         }
     
@@ -156,7 +156,7 @@ export default function Workout() {
                 <View style={[styles.inputWrapper, {flex: 1.5}]}>
                 <TextInput 
                     style={styles.input}
-                    keyboardType='numeric'
+                    keyboardType="numeric"
                     defaultValue={exercise.one_rm?.toString()}
                     onChangeText={(text) => handleOneRmChange(index, text)}
                     placeholder="0"
@@ -180,73 +180,73 @@ const styles = StyleSheet.create({
     container: {
       flex: 1,
       padding: 16,
-      backgroundColor: '#f8f9fa'
+      backgroundColor: "#f8f9fa"
     },
     header: {
-      flexDirection: 'row',
+      flexDirection: "row",
       paddingVertical: 14,
       paddingHorizontal: 8,
-      backgroundColor: '#008080',
+      backgroundColor: "#008080",
       borderRadius: 8,
       marginBottom: 8
     },
     headerText: {
-      color: 'white',
-      fontWeight: 'bold',
-      textAlign: 'center'
+      color: "white",
+      fontWeight: "bold",
+      textAlign: "center"
     },
     tableBody: {
       flex: 1,
       marginBottom: 16
     },
     row: {
-      flexDirection: 'row',
+      flexDirection: "row",
       paddingVertical: 12,
       paddingHorizontal: 8,
       borderBottomWidth: 1,
-      borderBottomColor: '#e0e0e0'
+      borderBottomColor: "#e0e0e0"
     },
     evenRow: {
-      backgroundColor: '#ffffff'
+      backgroundColor: "#ffffff"
     },
     oddRow: {
-      backgroundColor: '#f5f5f5'
+      backgroundColor: "#f5f5f5"
     },
     cellText: {
-      textAlign: 'center',
-      color: '#333',
-      alignSelf: 'center'
+      textAlign: "center",
+      color: "#333",
+      alignSelf: "center"
     },
     inputWrapper: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center'
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "center"
     },
     input: {
       width: 32,
       height: 32,
       borderWidth: 1,
-      borderColor: '#ddd',
+      borderColor: "#ddd",
       borderRadius: 6,
       padding: 4,
-      textAlign: 'center',
-      backgroundColor: 'white',
+      textAlign: "center",
+      backgroundColor: "white",
       marginRight: 4
     },
     unitText: {
-      color: '#666'
+      color: "#666"
     },
     startButton: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#008080',
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      backgroundColor: "#008080",
       paddingVertical: 14,
       borderRadius: 8,
     },
     buttonText: {
-      color: 'white',
-      fontWeight: 'bold',
+      color: "white",
+      fontWeight: "bold",
       fontSize: 16,
       marginRight: 8
     }

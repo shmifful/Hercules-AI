@@ -1,8 +1,8 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Pressable, View, Text, StyleSheet } from 'react-native';
-import { useEffect, useState, useRef } from 'react';
-import * as Speech from 'expo-speech';
-import { Ionicons } from '@expo/vector-icons';
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { Pressable, View, Text, StyleSheet } from "react-native";
+import { useEffect, useState, useRef } from "react";
+import * as Speech from "expo-speech";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function WorkoutScreen() {
     const router = useRouter();
@@ -54,7 +54,7 @@ export default function WorkoutScreen() {
     const readDesc = (text) => {
         // Text-to-Speech
         Speech.speak(text, {
-            language: 'en',
+            language: "en",
             pitch: 1,
             rate: 1
         });
@@ -89,7 +89,7 @@ export default function WorkoutScreen() {
           const data = await response.json();
           setDesc(data.description); 
         } catch (error) {
-          console.error('Error fetching exercise description:', error);
+          console.error("Error fetching exercise description:", error);
           setDesc("Description not available");
         }
     };
@@ -243,38 +243,38 @@ export default function WorkoutScreen() {
 
 const styles = StyleSheet.create({
     reminderContainer: {
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backgroundColor: "rgba(255, 255, 255, 0.9)",
         margin: 20,
         padding: 25,
         borderRadius: 15,
-        alignItems: 'center',
+        alignItems: "center",
     },
     warningIcon: {
         marginBottom: 15,
     },
     reminderTitle: {
         fontSize: 24,
-        fontWeight: 'bold',
-        color: '#333',
+        fontWeight: "bold",
+        color: "#333",
         marginBottom: 10,
     },
     reminderText: {
         fontSize: 16,
-        color: '#666',
-        textAlign: 'center',
+        color: "#666",
+        textAlign: "center",
         marginBottom: 25,
         lineHeight: 24,
     },
     reminderButton: {
-        backgroundColor: '#008080',
+        backgroundColor: "#008080",
         padding: 15,
         borderRadius: 8,
-        width: '100%',
-        alignItems: 'center',
+        width: "100%",
+        alignItems: "center",
     },
     reminderButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
+        color: "white",
+        fontWeight: "bold",
         fontSize: 16,
     },
 
@@ -282,11 +282,11 @@ const styles = StyleSheet.create({
         margin: 20,
         padding: 25,
         borderRadius: 15,
-        alignItems: 'center',
+        alignItems: "center",
     },
     timerTitle: {
         fontSize: 28,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         marginBottom: 5,
     },
     timerSubtitle: {
@@ -295,164 +295,164 @@ const styles = StyleSheet.create({
     },
     timerDisplay: {
         fontSize: 48,
-        fontWeight: 'bold',
+        fontWeight: "bold",
         marginBottom: 30,
     },
     timerButton: {
-        flexDirection: 'row',
+        flexDirection: "row",
         padding: 15,
         borderRadius: 30,
-        alignItems: 'center',
+        alignItems: "center",
     },
     timerButtonText: {
-        color: '#008080',
-        fontWeight: 'bold',
+        color: "#008080",
+        fontWeight: "bold",
         fontSize: 16,
         marginRight: 10,
     },
 
     ratingContainer: {
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backgroundColor: "rgba(255, 255, 255, 0.9)",
         margin: 20,
         padding: 25,
         borderRadius: 15,
-        alignItems: 'center',
+        alignItems: "center",
     },
     ratingTitle: {
         fontSize: 20,
-        fontWeight: 'bold',
-        color: '#333',
+        fontWeight: "bold",
+        color: "#333",
         marginBottom: 5,
-        textAlign: 'center',
+        textAlign: "center",
     },
     ratingSubtitle: {
         fontSize: 14,
-        color: '#666',
+        color: "#666",
         marginBottom: 25,
     },
     ratingStars: {
-        flexDirection: 'row',
+        flexDirection: "row",
         marginBottom: 30,
     },
     starIcon: {
         marginHorizontal: 5,
     },
     ratingButtons: {
-        flexDirection: 'row',
-        width: '100%',
-        justifyContent: 'space-between',
+        flexDirection: "row",
+        width: "100%",
+        justifyContent: "space-between",
     },
     ratingButton: {
         padding: 15,
         borderRadius: 8,
-        width: '48%',
-        alignItems: 'center',
+        width: "48%",
+        alignItems: "center",
     },
     skipButton: {
-        backgroundColor: '#f0f0f0',
+        backgroundColor: "#f0f0f0",
     },
     skipButtonText: {
-        color: '#666',
-        fontWeight: 'bold',
+        color: "#666",
+        fontWeight: "bold",
     },
     submitButton: {
-        backgroundColor: '#008080',
+        backgroundColor: "#008080",
     },
     submitButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
+        color: "white",
+        fontWeight: "bold",
     },
 
     completeContainer: {
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backgroundColor: "rgba(255, 255, 255, 0.9)",
         margin: 20,
         padding: 30,
         borderRadius: 15,
-        alignItems: 'center',
+        alignItems: "center",
     },
     completeTitle: {
         fontSize: 28,
-        fontWeight: 'bold',
-        color: '#333',
+        fontWeight: "bold",
+        color: "#333",
         marginVertical: 15,
     },
     completeText: {
         fontSize: 18,
-        color: '#666',
+        color: "#666",
         marginBottom: 25,
     },
     completeButton: {
-        backgroundColor: '#008080',
+        backgroundColor: "#008080",
         padding: 15,
         borderRadius: 8,
-        width: '100%',
-        alignItems: 'center',
+        width: "100%",
+        alignItems: "center",
     },
     completeButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
+        color: "white",
+        fontWeight: "bold",
         fontSize: 16,
     },
 
     exerciseContainer: {
-        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        backgroundColor: "rgba(255, 255, 255, 0.9)",
         margin: 20,
         padding: 25,
         borderRadius: 15,
     },
     exerciseName: {
         fontSize: 24,
-        fontWeight: 'bold',
-        color: '#333',
+        fontWeight: "bold",
+        color: "#333",
         marginBottom: 20,
-        textAlign: 'center',
+        textAlign: "center",
     },
     exerciseDetails: {
         marginBottom: 20,
-        alignItems: 'center',
+        alignItems: "center",
     },
     exerciseWeight: {
         fontSize: 32,
-        fontWeight: 'bold',
-        color: '#008080',
+        fontWeight: "bold",
+        color: "#008080",
         marginBottom: 5,
     },
     exerciseReps: {
         fontSize: 18,
-        color: '#666',
+        color: "#666",
         marginBottom: 5,
     },
     exerciseSet: {
         fontSize: 16,
-        color: '#666',
+        color: "#666",
         marginBottom: 20,
     },
     descriptionButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
         marginBottom: 15,
     },
     descriptionButtonText: {
-        color: '#008080',
-        fontWeight: 'bold',
+        color: "#008080",
+        fontWeight: "bold",
         marginLeft: 10,
     },
     exerciseDescription: {
         fontSize: 14,
-        color: '#666',
+        color: "#666",
         lineHeight: 22,
         marginBottom: 25,
     },
     restButton: {
-        backgroundColor: '#008080',
+        backgroundColor: "#008080",
         padding: 15,
         borderRadius: 8,
-        alignItems: 'center',
+        alignItems: "center",
     },
     restButtonText: {
-        color: 'white',
-        fontWeight: 'bold',
+        color: "white",
+        fontWeight: "bold",
         fontSize: 16,
     },
 });
