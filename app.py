@@ -3,7 +3,6 @@ import sqlite3 as sql
 import re
 from datetime import datetime, timedelta
 from GenerateWorkout import GenerateWorkout 
-import click
 
 app = Flask(__name__)
 email_re = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
@@ -343,6 +342,8 @@ def completed():
             cursor.execute(query)
             conn.commit()
 
+            generate_next_workout(id)
+
             return jsonify({"success": True})
             
         except sql.Error as e:
@@ -352,8 +353,6 @@ def completed():
             if conn:
                 conn.close()
 
-@app.cli.command("generate-workout")
-@click.argument('day_id')
 def generate_next_workout(day_id):
     conn = sql.connect("sql.db")
     cursor = conn.cursor()
