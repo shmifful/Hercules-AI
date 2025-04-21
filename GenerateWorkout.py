@@ -83,6 +83,7 @@ class GenerateWorkout:
         reps, rest, sets_per = cls.get_plan_details(goal)
 
         workout_plan = {}
+        day_num = 1
         for day_type in split:
             exercises = []
             if day_type == 'Full-Body':
@@ -134,7 +135,8 @@ class GenerateWorkout:
                         'Rest': rest
                     })
             
-            workout_plan[f'{day_type} day'] = exercises
+            workout_plan[f'Day {day_num} {day_type}'] = exercises
+            day_num += 1
         
         return workout_plan
     

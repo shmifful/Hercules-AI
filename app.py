@@ -124,10 +124,12 @@ def generate_plan(id, days, goal, level):
         conn.commit()
 
         plan_id = cursor.lastrowid
+        print(days)
         
         plan = GenerateWorkout.generate_first_week_plan(days_per_week=days, goal=goal, level=level)
         for day, exercises in plan.items():
             day_query = f"INSERT INTO workout_days (plan_id, day_type, completed) VALUES ('{plan_id}', '{day}', 0)"
+            print(day_query)
             cursor.execute(day_query)
             conn.commit()
             day_id = cursor.lastrowid
@@ -333,6 +335,8 @@ def completed():
         id = data.get("day_id")
         conn = sql.connect("sql.db")
         cursor = conn.cursor()
+
+        print(id)
         try:
             cursor = conn.cursor()
             

@@ -1,8 +1,9 @@
 import { useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import { useEffect } from 'react';
-import { Pressable, Text, View, Alert, TextInput } from 'react-native';
+import { Pressable, Text, View, Alert, TextInput, StyleSheet, ScrollView } from 'react-native';
 import { useState } from "react";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function Workout() {
     const router = useRouter();
@@ -113,7 +114,7 @@ export default function Workout() {
         router.replace({
             pathname: "/workout", 
             params: {
-                day_id: day_id,
+                "day_id": day_id,
                 exercises: JSON.stringify(
                     exercises.map((ex, index) => ({
                         ...ex,
@@ -128,49 +129,125 @@ export default function Workout() {
     }
 
     return (
-        <View style={{ padding: 20 }}>
-    {/* Table Header */}
-    <View style={{
-        flexDirection: 'row',
-        paddingVertical: 12,
-        borderBottomWidth: 2,
-        borderBottomColor: '#ddd',
-        marginBottom: 8,
-    }}>
-        <Text style={{ flex: 3, fontWeight: 'bold' }}>Exercise</Text>
-        <Text style={{ flex: 1, fontWeight: 'bold', textAlign: 'center' }}>Sets</Text>
-        <Text style={{ flex: 1, fontWeight: 'bold', textAlign: 'center' }}>Reps</Text>
-        <Text style={{ flex: 1, fontWeight: 'bold', textAlign: 'center' }}>Rest</Text>
-        <Text style={{ flex: 1, fontWeight: 'bold', textAlign: 'center' }}>1RM</Text>
-    </View>
-
-    {/* Table Rows */}
-    {exercises.map((exercise, index) => (
-        <View 
-            key={index}
-            style={{
-                flexDirection: 'row',
-                paddingVertical: 10,
-                borderBottomWidth: 1,
-                borderBottomColor: '#f5f5f5',
-            }}
-        >
-            <Text style={{ flex: 3 }}>{exercise.name}</Text>
-            <Text style={{ flex: 1, textAlign: 'center' }}>{exercise.sets}</Text>
-            <Text style={{ flex: 1, textAlign: 'center' }}>{exercise.reps}</Text>
-            <Text style={{ flex: 1, textAlign: 'center' }}>{exercise.rest}</Text>
-            <View style={{ flex: 1, justifyContent: 'center', alignItems:"flex-start", flexDirection:"row", padding:'0'}}>
-                <TextInput 
-                keyboardType='numeric'
-                defaultValue={exercise.one_rm?.toString()}
-                onChangeText={(text) => handleOneRmChange(index, text)}
-                />
-                <Text>kg</Text>
-            </View>
+        <View style={styles.container}>
+        {/* Table Header */}
+        <View style={styles.header}>
+            <Text style={[styles.headerText, {flex: 3}]}>Exercise</Text>
+            <Text style={[styles.headerText, {flex: 1}]}>Sets</Text>
+            <Text style={[styles.headerText, {flex: 1}]}>Reps</Text>
+            <Text style={[styles.headerText, {flex: 1}]}>Rest</Text>
+            <Text style={[styles.headerText, {flex: 1.5}]}>1RM</Text>
         </View>
-    ))}
 
-    <Pressable onPress={() => handleStart()}><Text>START</Text></Pressable>
-</View>
+        {/* Table Rows */}
+        <View style={styles.tableBody}>
+            {exercises.map((exercise, index) => (
+            <View 
+                key={index}
+                style={[
+                styles.row,
+                index % 2 === 0 ? styles.evenRow : styles.oddRow
+                ]}
+            >
+                <Text style={[styles.cellText, {flex: 3}]}>{exercise.name}</Text>
+                <Text style={[styles.cellText, {flex: 1}]}>{exercise.sets}</Text>
+                <Text style={[styles.cellText, {flex: 1}]}>{exercise.reps}</Text>
+                <Text style={[styles.cellText, {flex: 1}]}>{exercise.rest}</Text>
+                <View style={[styles.inputWrapper, {flex: 1.5}]}>
+                <TextInput 
+                    style={styles.input}
+                    keyboardType='numeric'
+                    defaultValue={exercise.one_rm?.toString()}
+                    onChangeText={(text) => handleOneRmChange(index, text)}
+                    placeholder="0"
+                />
+                <Text style={styles.unitText}>kg</Text>
+                </View>
+            </View>
+            ))}
+        </View>
+
+        {/* Start Button */}
+        <Pressable style={styles.startButton} onPress={handleStart}>
+            <Text style={styles.buttonText}>START WORKOUT</Text>
+            <Ionicons name="arrow-forward" size={20} color="white" />
+        </Pressable>
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      padding: 16,
+      backgroundColor: '#f8f9fa'
+    },
+    header: {
+      flexDirection: 'row',
+      paddingVertical: 14,
+      paddingHorizontal: 8,
+      backgroundColor: '#008080',
+      borderRadius: 8,
+      marginBottom: 8
+    },
+    headerText: {
+      color: 'white',
+      fontWeight: 'bold',
+      textAlign: 'center'
+    },
+    tableBody: {
+      flex: 1,
+      marginBottom: 16
+    },
+    row: {
+      flexDirection: 'row',
+      paddingVertical: 12,
+      paddingHorizontal: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: '#e0e0e0'
+    },
+    evenRow: {
+      backgroundColor: '#ffffff'
+    },
+    oddRow: {
+      backgroundColor: '#f5f5f5'
+    },
+    cellText: {
+      textAlign: 'center',
+      color: '#333',
+      alignSelf: 'center'
+    },
+    inputWrapper: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center'
+    },
+    input: {
+      width: 32,
+      height: 32,
+      borderWidth: 1,
+      borderColor: '#ddd',
+      borderRadius: 6,
+      padding: 4,
+      textAlign: 'center',
+      backgroundColor: 'white',
+      marginRight: 4
+    },
+    unitText: {
+      color: '#666'
+    },
+    startButton: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#008080',
+      paddingVertical: 14,
+      borderRadius: 8,
+    },
+    buttonText: {
+      color: 'white',
+      fontWeight: 'bold',
+      fontSize: 16,
+      marginRight: 8
+    }
+  });
