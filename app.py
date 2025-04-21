@@ -366,10 +366,48 @@ def generate_next_workout(day_id):
         conn.commit()
         exs = cursor.fetchall()
 
-        goal_query = f"SELECT u.goal, u.level FROM users u JOIN workout_plans wp ON u.user_id=wp.user_id JOIN workout_days wd ON wp.plan_id=wd.plan_id WHERE wd.day_id={day_id}"
+        goal_query = f"SELECT u.user_id, u.goal, u.level FROM users u JOIN workout_plans wp ON u.user_id=wp.user_id JOIN workout_days wd ON wp.plan_id=wd.plan_id WHERE wd.day_id={day_id}"
         cursor.execute(goal_query)
         conn.commit()
         user = cursor.fetchone()
+        user_id, goal, level = user
+
+        # 1) Try to insert:
+        cursor.execute(f"INSERT INTO workout_plans (user_id, start) SELECT {user_id}, date('now', '+7 days') WHERE NOT EXISTS (SELECT 1 FROM workout_plans WHERE user_id = {user_id} AND start   = date('now', 'weekday 1', '+7 days'))")
+
+    # 2) Grab the plan_id
+        cursor.execute(f"SELECT plan_id FROM workout_plans WHERE user_id = {user_id} AND start   = date('now', 'weekday 1', '+7 days')")
+        plan_id = cursor.fetchone()[0]
+
+        day_query = f"SELECT day_type FROM workout_days WHERE day_id={day_id}"
+        cursor.execute(day_query)
+        conn.commit()
+        day = cursor.fetchone()[0]
+
+        insert_day_query = f"INSERT INTO workout_days (plan_id, day_type, completed) SELECT '{plan_id}', '{day}', 0 WHERE NOT EXISTS (SELECT 1 FROM workout_days WHERE plan_id={plan_id} AND day_type='{day}')"
+        cursor.execute(insert_day_query)
+        conn.commit()
+
+        get_day_query = f"SELECT day_id FROM workout_days WHERE plan_id={plan_id}"
+        cursor.execute(get_day_query)
+        conn.commit()
+
+        day_id = cursor.fetchone()[0]
+
+        for ex in exs:
+            title, rating = ex            
+            workout = GenerateWorkout.generate_next_exercise(title, rating, level, goal)
+
+            max_one_rm = f"SELECT MAX(we.one_rm) AS max_one_rm FROM users u JOIN workout_plans wp ON u.user_id = wp.user_id JOIN workout_days wd ON wp.plan_id = wd.plan_id JOIN workout_exercises we ON wd.day_id = we.day_id WHERE u.user_id = {user_id} AND we.exercise_title = '{workout["Exercise"]}'"
+            cursor.execute(max_one_rm)
+            res = cursor.fetchone()[0]
+
+            print(res)
+
+            insert_workout_query = f"INSERT INTO workout_exercises (day_id, exercise_title, sets, reps_suggested, rest, one_rm) VALUES ({day_id},'{workout['Exercise']}', '{workout['Sets']}', '{workout['Reps']}', '{workout['Rest']}', {res if res else 0})"
+            cursor.execute(insert_workout_query)
+            conn.commit()
+
         
     except sql.Error as e:
         print(f"Database error: {e}")
@@ -377,12 +415,6 @@ def generate_next_workout(day_id):
     finally:
         if conn:
             conn.close()
-
-    for ex in exs:
-        title, rating = ex
-        goal, level = user
-        print(title)
-        print(GenerateWorkout.generate_next_exercise(title, rating, level, goal))
 
             
 
