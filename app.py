@@ -155,9 +155,6 @@ def get_workouts():
     if request.method == "POST":
         id = data.get("id")
 
-        # fill any holes
-        fill_missing_days(id)
-
         # DB connection
         conn = sql.connect("sql.db")
         cursor = conn.cursor()
@@ -167,18 +164,79 @@ def get_workouts():
         
             # Calculate start of week (Monday)
             start_of_week = today - timedelta(days=today.weekday())
-            
-            # Calculate end of week (Sunday)
-            end_of_week = start_of_week + timedelta(days=6)
-
             start_of_week = start_of_week.strftime("%Y-%m-%d")
-            end_of_week =  end_of_week.strftime("%Y-%m-%d")
             
             # Check if user details are correct
-            plan_query = f"SELECT plan_id FROM workout_plans WHERE start>='{start_of_week}' AND start<='{end_of_week}' AND user_id='{id}'"
+            plan_query = f"SELECT plan_id FROM workout_plans WHERE start>='{start_of_week}' AND user_id='{id}'"
             cursor.execute(plan_query)
             plan = cursor.fetchone()
             print(plan)
+
+            if plan is None:
+                #Get user preferences
+                goal_query = f"SELECT goal, level FROM users WHERE user_id={id}"
+                cursor.execute(goal_query)
+                conn.commit()
+                user = cursor.fetchone()
+                goal, level = user
+
+                prev_date_query = f"SELECT MAX(start) FROM workout_plans WHERE user_id={id}"
+                cursor.execute(prev_date_query)
+                prev = cursor.fetchone()[0]
+                print(prev, 1)
+
+                # Get the days of that week
+                prev_plan_id = f"SELECT plan_id FROM workout_plans WHERE user_id={id} AND start='{prev}'"
+                cursor.execute(prev_plan_id)
+                plan_id = cursor.fetchone()[0]
+                print(plan_id, 1212)
+
+                # Making new plans
+                plan_query = f"INSERT INTO workout_plans (user_id, start) VALUES ('{id}', '{start_of_week}')"
+                cursor.execute(plan_query)
+                conn.commit()
+                new_plan_id = cursor.lastrowid
+                print(new_plan_id, 123123)
+
+                # Get the days of that week
+                prev_days = f"SELECT day_id, day_type FROM workout_days WHERE plan_id={plan_id}"
+                cursor.execute(prev_days)
+                p_days = cursor.fetchall()
+                print(p_days)
+
+                day_ids = []
+                new_day_ids = []
+                
+                for day in p_days:
+                    i, t = day
+                    day_ids.append(i)
+                    insert_day_query = f"INSERT INTO workout_days (plan_id, day_type, completed) VALUES ('{new_plan_id}', '{t}', 0)"
+                    cursor.execute(insert_day_query)
+                    conn.commit()
+                    last = cursor.lastrowid
+                    print(last)
+                    new_day_ids.append(last)
+
+                for idx, i in enumerate(day_ids):
+                    get_prev_ex = f"SELECT exercise_title, rating FROM workout_exercises WHERE day_id={i}"
+                    cursor.execute(get_prev_ex)
+                    conn.commit()
+                    prev_exs = cursor.fetchall()
+
+                    for j in prev_exs:
+                        ex_title, rating = j
+                        workout = GenerateWorkout.generate_next_exercise(ex_title, rating, level, goal)
+                        print(workout["Exercise"])
+
+                        max_one_rm = f"SELECT MAX(we.one_rm) AS max_one_rm FROM users u JOIN workout_plans wp ON u.user_id = wp.user_id JOIN workout_days wd ON wp.plan_id = wd.plan_id JOIN workout_exercises we ON wd.day_id = we.day_id WHERE u.user_id = {id} AND we.exercise_title = '{workout["Exercise"]}'"
+                        cursor.execute(max_one_rm)
+                        res = cursor.fetchone()[0]
+
+                        print(res)
+
+                        insert_workout_query = f"INSERT INTO workout_exercises (day_id, exercise_title, sets, reps_suggested, rest, one_rm) VALUES ({new_day_ids[idx]},'{workout['Exercise']}', '{workout['Sets']}', '{workout['Reps']}', '{workout['Rest']}', {res if res else 0})"
+                        cursor.execute(insert_workout_query)
+                        conn.commit()
 
             days_query = f"SELECT day_id, day_type, completed FROM workout_days WHERE plan_id={plan[0]}"
             cursor.execute(days_query)
@@ -197,23 +255,6 @@ def get_workouts():
             print("Something went wrong")
         finally:
             conn.close()
-
-@click.argument("fill")
-def fill_missing_days(id):
-    conn = sql.connect("sql.db")
-    cursor = conn.cursor()
-    print("DB init...")
-    try:
-        # Check if user details are correct
-        exercises_query = f"SELECT * FROM workout_plans WHERE user_id={id}"
-        cursor.execute(exercises_query)
-        exercises = cursor.fetchall()
-        print(exercises)
-
-    except sql.IntegrityError:
-        print("Something went wrong")
-    finally:
-        conn.close()
 
 @app.route("/get_exercises", methods=["POST"])
 def get_exercises():
