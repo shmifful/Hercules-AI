@@ -2,8 +2,8 @@ from flask import Flask, request, jsonify
 import sqlite3 as sql 
 import re
 from datetime import datetime, timedelta
-from GenerateFirstWeek import GenerateWorkout 
-import urllib.parse
+from GenerateWorkout import GenerateWorkout 
+import click
 
 app = Flask(__name__)
 email_re = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
@@ -85,7 +85,7 @@ def register():
         print("DB init...")
         try:
             # Inserting user data and closing the connection
-            query = f"INSERT INTO users (username, email, password, days, goal) VALUES ('{username}', '{email}', '{password}', '{days}', '{goal}')"
+            query = f"INSERT INTO users (username, email, password, days, goal, level) VALUES ('{username}', '{email}', '{password}', '{days}', '{goal}', '{level}')"
             cursor.execute(query)
             conn.commit()
             print(username, email, password, cpass, days, goal)
@@ -126,7 +126,7 @@ def generate_plan(id, days, goal, level):
 
         plan_id = cursor.lastrowid
         
-        plan = GenerateWorkout.generate_workout_plan(days_per_week=days, goal=goal, level=level)
+        plan = GenerateWorkout.generate_first_week_plan(days_per_week=days, goal=goal, level=level)
         for day, exercises in plan.items():
             day_query = f"INSERT INTO workout_days (plan_id, day_type, completed) VALUES ('{plan_id}', '{day}', 0)"
             cursor.execute(day_query)
@@ -291,7 +291,7 @@ def get_exercise_description():
         if not ex:
             return jsonify({"error": "Exercise parameter missing"}), 400
         
-        description = GenerateWorkout.getExDesc(ex)
+        description = GenerateWorkout.get_ex_desc(ex)
         print(description)
         
         return jsonify({
@@ -301,12 +301,89 @@ def get_exercise_description():
 @app.route("/rating/<int:id>", methods=["PUT"])
 def put_rating(id):
     data = request.get_json()
+    print(data)
 
     if request.method == "PUT":
-        print(data)
-        print(id)
+        rating = data.get("rating")
+        conn = sql.connect("sql.db")
+        cursor = conn.cursor()
+        try:
+            cursor = conn.cursor()
+            
+            # Execute the query
+            query = f"UPDATE workout_exercises SET rating={rating} WHERE exercise_id={id}"
 
-        return jsonify({"success": True})
+            cursor.execute(query)
+            conn.commit()
+
+            return jsonify({"success": True})
+            
+        except sql.Error as e:
+            print(f"Database error: {e}")
+            return jsonify({"success": False})
+        finally:
+            if conn:
+                conn.close()
+    
+@app.route("/completed", methods=["PUT"])
+def completed():
+    data = request.get_json()
+    print(request.method, data)
+
+    if request.method == "PUT":
+        id = data.get("day_id")
+        conn = sql.connect("sql.db")
+        cursor = conn.cursor()
+        try:
+            cursor = conn.cursor()
+            
+            # Execute the query
+            query = f"UPDATE workout_days SET completed=1 WHERE day_id={id}"
+
+            cursor.execute(query)
+            conn.commit()
+
+            return jsonify({"success": True})
+            
+        except sql.Error as e:
+            print(f"Database error: {e}")
+            return jsonify({"success": False})
+        finally:
+            if conn:
+                conn.close()
+
+@app.cli.command("generate-workout")
+@click.argument('day_id')
+def generate_next_workout(day_id):
+    conn = sql.connect("sql.db")
+    cursor = conn.cursor()
+    try:
+        cursor = conn.cursor()
+        
+        # Execute the query
+        query = f"SELECT exercise_title, rating FROM workout_exercises WHERE day_id={day_id}"
+        cursor.execute(query)
+        conn.commit()
+        exs = cursor.fetchall()
+
+        goal_query = f"SELECT u.goal, u.level FROM users u JOIN workout_plans wp ON u.user_id=wp.user_id JOIN workout_days wd ON wp.plan_id=wd.plan_id WHERE wd.day_id={day_id}"
+        cursor.execute(goal_query)
+        conn.commit()
+        user = cursor.fetchone()
+        
+    except sql.Error as e:
+        print(f"Database error: {e}")
+        return jsonify({"success": False})
+    finally:
+        if conn:
+            conn.close()
+
+    for ex in exs:
+        title, rating = ex
+        goal, level = user
+        print(title)
+        print(GenerateWorkout.generate_next_exercise(title, rating, level, goal))
+
             
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel, cosine_similarity
 import random
+import numpy as np
 
 class GenerateWorkout:
     # Load dataset and prepare similarity matrices (as in the original code)
@@ -37,29 +38,8 @@ class GenerateWorkout:
         'legs': df[df["Movement"]=="legs"].sort_values("Rating", ascending=False).head(15)["Title"].to_list(),
         'core': df[df["Movement"]=="core"].sort_values("Rating", ascending=False).head(15)["Title"].to_list()
     }
-
-    @classmethod
-    def get_recommendations(cls, title, num_recommend=7):
-        similarity_matrix = cls.combined_sim
-        idx = cls.indices[title]
-        sim_scores = list(enumerate(similarity_matrix[idx]))
-        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-        return cls.df.iloc[random.choice(sim_scores[:10])[0]]
-
-    @classmethod
-    def generate_workout_plan(cls, days_per_week, goal, level):
-        # Determine workout split
-        if days_per_week == 3:
-            split = ['Full-Body'] * 3
-        elif days_per_week == 4:
-            split = ['Upper', 'Lower', 'Upper', 'Lower']
-        elif days_per_week == 5:
-            split = ['Push', 'Pull', 'Legs', 'Upper', 'Lower']
-        elif days_per_week == 6:
-            split = ['Push', 'Pull', 'Legs', 'Push', 'Pull', 'Legs']
-        else:
-            return "Invalid number of days (choose 3-6)."
-
+    
+    def get_plan_details(goal):
         # Set parameters based on goal
         if goal == 'Strength':
             reps = (1, 5)
@@ -73,15 +53,43 @@ class GenerateWorkout:
             reps = (15, 40)
             rest = '30-60s'
             sets_per = 2
+        
+        return (reps, rest, sets_per)
+
+
+    @classmethod
+    def get_recommendations(cls, title, level):
+        similarity_matrix = cls.combined_sim
+        idx = cls.indices[title]
+        sim_scores = list(enumerate(similarity_matrix[idx]))
+        sim_scores = [(i, score + 0.1 if cls.df.iloc[i]['Level'] == level else score) for i, score in sim_scores]
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+        return cls.df.iloc[random.choice(sim_scores[:10])[0]]
+
+    @classmethod
+    def generate_first_week_plan(cls, days_per_week, goal, level):
+        # Determine workout split
+        if days_per_week == 3:
+            split = ['Full-Body'] * 3
+        elif days_per_week == 4:
+            split = ['Upper', 'Lower', 'Upper', 'Lower']
+        elif days_per_week == 5:
+            split = ['Push', 'Pull', 'Legs', 'Upper', 'Lower']
+        elif days_per_week == 6:
+            split = ['Push', 'Pull', 'Legs', 'Push', 'Pull', 'Legs']
+        else:
+            return "Invalid number of days (choose 3-6)."
+
+        reps, rest, sets_per = cls.get_plan_details(goal)
 
         workout_plan = {}
-        for day_num, day_type in enumerate(split, 1):
+        for day_type in split:
             exercises = []
             if day_type == 'Full-Body':
                 # Include 1 push, 1 pull, 1 legs, 1 core
                 for movement in ['push', 'pull', 'legs', 'core']:
                     primary = random.choice(cls.primary_exercises[movement])
-                    recs = cls.get_recommendations(primary)
+                    recs = cls.get_recommendations(primary, level)
                     exercise = recs['Title']
                     exercises.append({
                         'Exercise': exercise,
@@ -93,7 +101,7 @@ class GenerateWorkout:
                 # 2 push, 2 pull
                 for movement in ['push', 'push', 'pull', 'pull']:
                     primary = random.choice(cls.primary_exercises[movement])
-                    recs = cls.get_recommendations(primary)
+                    recs = cls.get_recommendations(primary, level)
                     exercise = recs['Title']
                     exercises.append({
                         'Exercise': exercise,
@@ -105,7 +113,7 @@ class GenerateWorkout:
                 # 2 legs, 2 core
                 for movement in ['legs', 'legs', 'core', 'core']:
                     primary = random.choice(cls.primary_exercises[movement])
-                    recs = cls.get_recommendations(primary)
+                    recs = cls.get_recommendations(primary, level)
                     exercise = recs['Title']
                     exercises.append({
                         'Exercise': exercise,
@@ -117,7 +125,7 @@ class GenerateWorkout:
                 movement = day_type.lower()
                 for _ in range(0, 4):  # 4 exercises per focused day
                     primary = random.choice(cls.primary_exercises[movement])
-                    recs = cls.get_recommendations(primary)
+                    recs = cls.get_recommendations(primary, level)
                     exercise = recs['Title']
                     exercises.append({
                         'Exercise': exercise,
@@ -131,5 +139,41 @@ class GenerateWorkout:
         return workout_plan
     
     @classmethod
-    def getExDesc(cls, ex):
-        return cls.df.loc[cls.df["Title"] == ex]["Desc"].values.item()
+    def get_ex_desc(cls, ex):
+        return cls.df.loc[cls.df["Title"] == ex]["Desc"].values[0]
+    
+    @classmethod
+    def generate_next_exercise(cls, title, rating, level, goal):
+        reps, rest, sets_per = cls.get_plan_details(goal)
+
+        if rating is None:
+            cat_weight, text_weight = 0.5, 0.5
+
+        if rating == 1:
+            cat_weight, text_weight = 0.2, 0.8
+        elif rating == 2:
+            cat_weight, text_weight = 0.4, 0.6
+        elif rating == 3:
+            cat_weight, text_weight = 0.6, 0.4
+        elif rating == 4:
+            cat_weight, text_weight = 0.8, 0.2
+        elif rating == 5:
+            cat_weight, text_weight = 1, 0
+
+        combined_sim = cat_weight * cls.categorical_sim + text_weight * cls.text_sim
+        idx = cls.indices[title]
+
+        if isinstance(idx, (pd.Series, pd.Index, list, np.ndarray)):
+            idx = idx.iloc[0]
+        sim_scores = list(enumerate(combined_sim[idx]))
+        sim_scores = [(i, score + 0.1 if cls.df.iloc[i]['Level'] == level else score) for i, score in sim_scores]
+        sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+        recom_ex = cls.df.iloc[random.choice(sim_scores[:5])[0]]["Title"]
+        return {
+                'Exercise': recom_ex,
+                'Sets': sets_per,
+                'Reps': f"{reps[0]}-{reps[1]}",
+                'Rest': rest
+                }
+
+    

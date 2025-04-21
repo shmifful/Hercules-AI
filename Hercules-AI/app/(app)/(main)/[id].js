@@ -113,6 +113,7 @@ export default function Workout() {
         router.replace({
             pathname: "/workout", 
             params: {
+                day_id: day_id,
                 exercises: JSON.stringify(
                     exercises.map((ex, index) => ({
                         ...ex,

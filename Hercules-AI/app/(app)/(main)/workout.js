@@ -18,7 +18,7 @@ export default function WorkoutScreen() {
     const [rate, setRate] = useState(0);
     const intervalRef = useRef(null);
     const startTimeRef = useRef(0);
-    const { exercises } = useLocalSearchParams();
+    const { day_id, exercises } = useLocalSearchParams();
 
     useEffect(() => {
         const parsedExercises = JSON.parse(exercises);
@@ -100,7 +100,7 @@ export default function WorkoutScreen() {
                 "rating": rate
             }
 
-            fetch(`http://10.0.2.2/rating/${data.id}`, {
+            await fetch(`http://10.0.2.2:5000/rating/${data.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -161,11 +161,23 @@ export default function WorkoutScreen() {
         )
     }
 
+    const finishWorkout = async () => {
+        await fetch("http://10.0.2.2:5000/completed", {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({"day_id": day_id}),
+        })
+
+        router.replace("/main");
+    }
+
     if (done) {
         return (
             <View style={{ padding: 20 }}>
                 <Text>Workout complete! 🎉</Text>
-                <Pressable onPress={() => router.replace("/main")}><Text>Return to main</Text></Pressable>
+                <Pressable onPress={() => finishWorkout()}><Text>Return to main</Text></Pressable>
             </View>
         );
     }

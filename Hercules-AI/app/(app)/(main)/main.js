@@ -19,6 +19,7 @@ export default function Main() {
                     const parsedUser = JSON.parse(storedUser);
                     setUser(parsedUser);
                     setDays(parsedUser.days);
+                    console.log(parsedUser)
 
                     try {
                         const req = await fetch("http://10.0.2.2:5000/get_workouts", {
@@ -81,7 +82,8 @@ export default function Main() {
                         const dayData = workouts[dayName];
                         router.push({
                             pathname:"[id]",
-                            params: {dayName: dayName,
+                            params: {
+                                dayName: dayName,
                                 dayData: JSON.stringify(dayData)},
                         })
                     }}
