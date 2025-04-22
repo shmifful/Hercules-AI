@@ -3,7 +3,6 @@ import sqlite3 as sql
 import re
 from datetime import datetime, timedelta
 from GenerateWorkout import GenerateWorkout 
-import click
 
 app = Flask(__name__)
 email_re = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
