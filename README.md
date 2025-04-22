@@ -28,3 +28,28 @@ Workout screen:
 - Gives recommended weights to lift and rep range based on their preferences
 - Allows user to rest and recommends the recommended time to rest based on their preferences
 - Allows user to rate the workout, which will be used to generate fututre workouts
+
+### app.py (server)
+Credentials:
+- Allows the user to register and stores it the database, returns error if any arise
+- Allows the user to log in by reading user details from database, returns error if any arise
+- When registering, the server will generate the first week of the workout plan based on user preferences
+
+Getting workouts:
+- Returns the wout plan for the week with their details
+- If workouts have not been generated, the server will generate the workouts based on user history
+
+Exercises:
+- Returns the exercises for the selected day
+- Return 5 extra exercises similar to the suggested ones, in case the user wants to change exercises
+- Updates the database when the user changes the exercises and updates the 1RM
+- Returns description for a given exercise
+
+### GenerateWorkout.py 
+This python script generates the workout plans based on user preferences and sends it back to the server. It can also generate an exercsie given the user history with that exercise.
+
+### sql.db (Database)
+This .db file stores user data, workout plans, workout days, workout exercises.
+
+### AugmentedExercises.csv
+Stores all the data about exercises.
