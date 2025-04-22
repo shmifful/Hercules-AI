@@ -54,6 +54,11 @@ This .db file stores user data, workout plans, workout days, workout exercises.
 ### AugmentedExercises.csv
 Stores all the data about exercises.
 
+# Prerequisites
+- Python 3.8+
+- Node.js 16+
+- Expo CLI (`npm install -g expo-cli`)
+
 # Installation
 ## 1. Clone the repository
 ```bash
@@ -63,6 +68,7 @@ cd Hercules-AI
 ## 2. Install dependencies
 ```bash 
 pip install -r requirements.txt
+npm install
 ```
 
 ## 3. Get emulator and run
@@ -112,3 +118,9 @@ Hercules-Al/
 ├── app.py                 # Python backend/server 
 └── GenerateWorkout.py     # Python workout generator script  
 ```
+
+# Acknowledgements
+- [niharika41298](https://www.kaggle.com/datasets/niharika41298/gym-exercise-data) - for the dataset
+- [Expo](https://expo.dev/) – for app development
+- [Android SDK](https://developer.android.com/studio?gclsrc=aw.ds&gad_source=1&gclid=Cj0KCQjw_JzABhC2ARIsAPe3ynqboRXqjhHk8msyG-CLU7xJYgtLPG8NgwXrUtdUwJv0wmaTBDorLykaAlRXEALw_wcB) - for the emulator
+- [SQLite](https://www.sqlite.org/) – For lightweight database storage
