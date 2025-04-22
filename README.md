@@ -114,7 +114,6 @@ Hercules-Al/
 ├── WorkoutData/           # Workout-related data/files  
 │   ├── AugmentedExercises.csv  # Exercise dataset  
 │   └── sql.db             # SQLite database  
-├── .ipynb_checkpoints/    # Jupyter notebook temp files  
 ├── app.py                 # Python backend/server 
 └── GenerateWorkout.py     # Python workout generator script  
 ```
