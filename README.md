@@ -53,3 +53,15 @@ This .db file stores user data, workout plans, workout days, workout exercises.
 
 ### AugmentedExercises.csv
 Stores all the data about exercises.
+
+# Installation
+## 1. Clone the repository
+```
+bash
+   git clone https://github.com/shmifful/Hercules-AI
+   cd Hercules-AI
+   ```
+## 2. Install dependencies
+```
+bash 
+pip install -r requirements.txt```
