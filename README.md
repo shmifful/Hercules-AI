@@ -68,6 +68,7 @@ cd Hercules-AI
 ## 2. Install dependencies
 ```bash 
 pip install -r requirements.txt
+cd Hercules-AI
 npm install
 ```
 
