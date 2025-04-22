@@ -49,7 +49,7 @@ Exercises:
 This python script generates the workout plans based on user preferences and sends it back to the server. It can also generate an exercsie given the user history with that exercise.
 
 ### sql.db (Database)
-This .db file stores user data, workout plans, workout days, workout exercises.
+The sql.db file stores user data, workout plans, workout days, workout exercises.
 
 ### AugmentedExercises.csv
 Stores all the data about exercises.
@@ -72,7 +72,7 @@ npm install
 ```
 
 ## 3. Get emulator and run
-Install Android studio from https://developer.android.com/studio?gclsrc=aw.ds&gad_source=1&gclid=Cj0KCQjw_JzABhC2ARIsAPe3ynqboRXqjhHk8msyG-CLU7xJYgtLPG8NgwXrUtdUwJv0wmaTBDorLykaAlRXEALw_wcB
+Install [Android studio](https://developer.android.com/studio?gclsrc=aw.ds&gad_source=1&gclid=Cj0KCQjw_JzABhC2ARIsAPe3ynqboRXqjhHk8msyG-CLU7xJYgtLPG8NgwXrUtdUwJv0wmaTBDorLykaAlRXEALw_wcB)
 ```bash
 cd Hercules-AI
 npx expo start
