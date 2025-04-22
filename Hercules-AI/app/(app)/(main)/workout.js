@@ -125,7 +125,7 @@ export default function WorkoutScreen() {
                     If you feel physically unfit to workout, please stop and seek medical help.
                 </Text>
                 <Pressable style={styles.reminderButton} onPress={() => setRemember(true)}>
-                    <Text style={styles.reminderButtonText}>I UNDESTAND</Text>
+                    <Text style={styles.reminderButtonText}>I UNDERSTAND</Text>
                 </Pressable>
             </View>
         );
@@ -138,7 +138,7 @@ export default function WorkoutScreen() {
             <View style={styles.timerContainer}>
                 <Text style={styles.timerTitle}>Rest time</Text>
                 <Text style={styles.timerSubtitle}>Recommended rest: {current?.rest}</Text>
-                <Text style={styles.timerDisplay}>Time reseted: {Math.floor(time / 60) < 10 ? `0${Math.floor(time / 60)}` : Math.floor(time / 60)}: {time % 60 < 10 ? `0${time % 60}` : time % 60}</Text>
+                <Text style={styles.timerDisplay}>Time rested: {Math.floor(time / 60) < 10 ? `0${Math.floor(time / 60)}` : Math.floor(time / 60)}: {time % 60 < 10 ? `0${time % 60}` : time % 60}</Text>
                 <Pressable style={styles.buttonPressed} onPress={() => resetStopwatch()}>
                     <Text style={styles.timerButtonText}>NEXT EXERCISE</Text>
                 </Pressable>
