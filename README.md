@@ -78,3 +78,36 @@ In a new command prompt:
 ```bash
 python app.py
 ```
+
+# Project Structure
+
+Hercules-Al/  
+├── .expo/                  # Expo development files (auto-generated)  
+├── app/                    # Main app source code  
+│   ├── (app)/              # App core components  
+│   │   ├── JS_layout.js  
+│   │   ├── JS[id].js  
+│   │   ├── JS.main.js  
+│   │   └── JS_workout.js  
+│   ├── (settings)/         # Settings-related screens  
+│   │   ├── JS_layout.js  
+│   │   └── JS_settings.js  
+│   ├── (credentials)/      # Authentication screens  
+│   │   ├── JS_layout.js  
+│   │   ├── JS_login.js  
+│   │   ├── JS_register.js  
+│   │   └── JS_index.js  
+│   └── JSApp.js            # Root app component  
+├── assets/                 
+├── node_modules/           # NPM dependencies (auto-generated)  
+├── .gitignore             # Git ignore rules  
+├── app.json               # Expo app configuration  
+├── babel.config.js        
+├── package.json           # Project metadata and dependencies  
+├── package-lock.json      # Exact dependency versions  
+├── WorkoutData/           # Workout-related data/files  
+│   ├── AugmentedExercises.csv  # Exercise dataset  
+│   └── sql.db             # SQLite database  
+├── .ipynb_checkpoints/    # Jupyter notebook temp files  
+├── app.py                 # Python backend/server 
+└── GenerateWorkout.py     # Python workout generator script  
