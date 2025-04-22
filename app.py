@@ -167,10 +167,11 @@ def get_workouts():
             start_of_week = start_of_week.strftime("%Y-%m-%d")
             
             # Check if user details are correct
-            plan_query = f"SELECT plan_id FROM workout_plans WHERE start>='{start_of_week}' AND user_id='{id}'"
+            plan_query = f"SELECT plan_id FROM workout_plans WHERE start='{start_of_week}' AND user_id='{id}'"
             cursor.execute(plan_query)
             plan = cursor.fetchone()
-            print(plan)
+            print(plan_query)
+            print(plan, 123)
 
             if plan is None:
                 #Get user preferences
@@ -179,33 +180,35 @@ def get_workouts():
                 conn.commit()
                 user = cursor.fetchone()
                 goal, level = user
+                print(user)
 
                 prev_date_query = f"SELECT MAX(start) FROM workout_plans WHERE user_id={id}"
                 cursor.execute(prev_date_query)
+                conn.commit()
                 prev = cursor.fetchone()[0]
-                print(prev, 1)
 
                 # Get the days of that week
                 prev_plan_id = f"SELECT plan_id FROM workout_plans WHERE user_id={id} AND start='{prev}'"
                 cursor.execute(prev_plan_id)
-                plan_id = cursor.fetchone()[0]
-                print(plan_id, 1212)
-
-                # Making new plans
-                plan_query = f"INSERT INTO workout_plans (user_id, start) VALUES ('{id}', '{start_of_week}')"
-                cursor.execute(plan_query)
-                conn.commit()
-                new_plan_id = cursor.lastrowid
-                print(new_plan_id, 123123)
+                plan = cursor.fetchone()
+                print(plan)
 
                 # Get the days of that week
-                prev_days = f"SELECT day_id, day_type FROM workout_days WHERE plan_id={plan_id}"
+                prev_days = f"SELECT day_id, day_type FROM workout_days WHERE plan_id={plan[0]}"
                 cursor.execute(prev_days)
                 p_days = cursor.fetchall()
                 print(p_days)
 
                 day_ids = []
                 new_day_ids = []
+
+                # Making new plans
+                plan_query = f"INSERT INTO workout_plans (user_id, start) VALUES ({id}, '{start_of_week}')"
+                print(plan_query)
+                cursor.execute(plan_query)
+                conn.commit()
+                new_plan_id = cursor.lastrowid
+                print(new_plan_id)
                 
                 for day in p_days:
                     i, t = day
@@ -214,7 +217,6 @@ def get_workouts():
                     cursor.execute(insert_day_query)
                     conn.commit()
                     last = cursor.lastrowid
-                    print(last)
                     new_day_ids.append(last)
 
                 for idx, i in enumerate(day_ids):
@@ -226,13 +228,10 @@ def get_workouts():
                     for j in prev_exs:
                         ex_title, rating = j
                         workout = GenerateWorkout.generate_next_exercise(ex_title, rating, level, goal)
-                        print(workout["Exercise"])
 
                         max_one_rm = f"SELECT MAX(we.one_rm) AS max_one_rm FROM users u JOIN workout_plans wp ON u.user_id = wp.user_id JOIN workout_days wd ON wp.plan_id = wd.plan_id JOIN workout_exercises we ON wd.day_id = we.day_id WHERE u.user_id = {id} AND we.exercise_title = '{workout["Exercise"]}'"
                         cursor.execute(max_one_rm)
                         res = cursor.fetchone()[0]
-
-                        print(res)
 
                         insert_workout_query = f"INSERT INTO workout_exercises (day_id, exercise_title, sets, reps_suggested, rest, one_rm) VALUES ({new_day_ids[idx]},'{workout['Exercise']}', '{workout['Sets']}', '{workout['Reps']}', '{workout['Rest']}', {res if res else 0})"
                         cursor.execute(insert_workout_query)
@@ -409,8 +408,6 @@ def completed():
             cursor.execute(query)
             conn.commit()
 
-            generate_next_workout(id)
-
             return jsonify({"success": True})
             
         except sql.Error as e:
@@ -420,65 +417,60 @@ def completed():
             if conn:
                 conn.close()
 
-def generate_next_workout(day_id):
-    conn = sql.connect("sql.db")
-    cursor = conn.cursor()
-    try:
+@app.route("/get_preferences", methods=["GET"])
+def get_prefences():
+    if request.method == "GET":
+        print(request)
+        user_id = request.args.get("user_id")
+        print(user_id)
+
+        conn = sql.connect("sql.db")
         cursor = conn.cursor()
-        
-        # Execute the query
-        query = f"SELECT exercise_title, rating FROM workout_exercises WHERE day_id={day_id}"
-        cursor.execute(query)
-        conn.commit()
-        exs = cursor.fetchall()
+        try:
+            cursor = conn.cursor()
+            
+            # Execute the query
+            query = f"SELECT goal, level FROM users WHERE user_id={user_id}"
+            cursor.execute(query)
+            conn.commit()
+            goal, level = cursor.fetchone()
 
-        goal_query = f"SELECT u.user_id, u.goal, u.level FROM users u JOIN workout_plans wp ON u.user_id=wp.user_id JOIN workout_days wd ON wp.plan_id=wd.plan_id WHERE wd.day_id={day_id}"
-        cursor.execute(goal_query)
-        conn.commit()
-        user = cursor.fetchone()
-        user_id, goal, level = user
+            return jsonify({"goal": goal, "level": level})
+            
+        except sql.Error as e:
+            print(f"Database error: {e}")
+            return jsonify({"success": False})
+        finally:
+            if conn:
+                conn.close()
 
-        cursor.execute(f"INSERT INTO workout_plans (user_id, start) SELECT {user_id}, date('now', '+7 days') WHERE NOT EXISTS (SELECT 1 FROM workout_plans WHERE user_id = {user_id} AND start   = date('now', 'weekday 1', '+7 days'))")
+@app.route("/update_preferences", methods=["PUT"])
+def update_preferences():
+    data = request.get_json()
 
-        cursor.execute(f"SELECT plan_id FROM workout_plans WHERE user_id = {user_id} AND start   = date('now', 'weekday 1', '+7 days')")
-        plan_id = cursor.fetchone()[0]
+    if request.method == "PUT":
+        user_id = data.get("user_id")
+        goal = data.get("goal")
+        level = data.get("level")
 
-        day_query = f"SELECT day_type FROM workout_days WHERE day_id={day_id}"
-        cursor.execute(day_query)
-        conn.commit()
-        day = cursor.fetchone()[0]
-
-        insert_day_query = f"INSERT INTO workout_days (plan_id, day_type, completed) SELECT '{plan_id}', '{day}', 0 WHERE NOT EXISTS (SELECT 1 FROM workout_days WHERE plan_id={plan_id} AND day_type='{day}')"
-        cursor.execute(insert_day_query)
-        conn.commit()
-
-        get_day_query = f"SELECT day_id FROM workout_days WHERE plan_id={plan_id}"
-        cursor.execute(get_day_query)
-        conn.commit()
-
-        day_id = cursor.fetchone()[0]
-
-        for ex in exs:
-            title, rating = ex            
-            workout = GenerateWorkout.generate_next_exercise(title, rating, level, goal)
-
-            max_one_rm = f"SELECT MAX(we.one_rm) AS max_one_rm FROM users u JOIN workout_plans wp ON u.user_id = wp.user_id JOIN workout_days wd ON wp.plan_id = wd.plan_id JOIN workout_exercises we ON wd.day_id = we.day_id WHERE u.user_id = {user_id} AND we.exercise_title = '{workout["Exercise"]}'"
-            cursor.execute(max_one_rm)
-            res = cursor.fetchone()[0]
-
-            print(res)
-
-            insert_workout_query = f"INSERT INTO workout_exercises (day_id, exercise_title, sets, reps_suggested, rest, one_rm) VALUES ({day_id},'{workout['Exercise']}', '{workout['Sets']}', '{workout['Reps']}', '{workout['Rest']}', {res if res else 0})"
-            cursor.execute(insert_workout_query)
+        conn = sql.connect("sql.db")
+        cursor = conn.cursor()
+        try:
+            cursor = conn.cursor()
+            
+            # Execute the query
+            query = f"UPDATE users SET goal='{goal}', level='{level}' WHERE user_id={user_id}"
+            cursor.execute(query)
             conn.commit()
 
-        
-    except sql.Error as e:
-        print(f"Database error: {e}")
-        return jsonify({"success": False})
-    finally:
-        if conn:
-            conn.close()
+            return jsonify({"success": True})
+            
+        except sql.Error as e:
+            print(f"Database error: {e}")
+            return jsonify({"success": False})
+        finally:
+            if conn:
+                conn.close()
 
 if __name__ == "__main__":
     app.run(debug=True)
