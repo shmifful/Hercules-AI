@@ -57,9 +57,24 @@ Stores all the data about exercises.
 # Installation
 ## 1. Clone the repository
 ```bash
-   git clone https://github.com/shmifful/Hercules-AI
-   cd Hercules-AI
+git clone https://github.com/shmifful/Hercules-AI
+cd Hercules-AI
    ```
 ## 2. Install dependencies
 ```bash 
-pip install -r requirements.txt```
+pip install -r requirements.txt
+```
+
+## 3. Get emulator and run
+Install Android studio from https://developer.android.com/studio?gclsrc=aw.ds&gad_source=1&gclid=Cj0KCQjw_JzABhC2ARIsAPe3ynqboRXqjhHk8msyG-CLU7xJYgtLPG8NgwXrUtdUwJv0wmaTBDorLykaAlRXEALw_wcB
+```bash
+cd Hercules-AI
+npx expo start
+```
+Then press "a" on the keyboard to run the app on the emulator.
+
+## 4. Run server
+In a new command prompt:
+```bash
+python app.py
+```
