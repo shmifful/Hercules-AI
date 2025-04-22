@@ -80,7 +80,7 @@ python app.py
 ```
 
 # Project Structure
-
+```
 Hercules-Al/  
 ├── .expo/                  # Expo development files (auto-generated)  
 ├── app/                    # Main app source code  
@@ -111,3 +111,4 @@ Hercules-Al/
 ├── .ipynb_checkpoints/    # Jupyter notebook temp files  
 ├── app.py                 # Python backend/server 
 └── GenerateWorkout.py     # Python workout generator script  
+```
