@@ -280,6 +280,7 @@ def get_exercises():
             # Formatting exercises to send
             for ex in exercises:
                 ex_id, title, sets, reps, rest = ex
+                alt_ex = get_other_exs(title)
                 one_rm = get_max_one_rm(user_id, title)
                 print(one_rm)
                 send_data[title] = {
@@ -287,7 +288,8 @@ def get_exercises():
                     "sets": sets,
                     "reps": reps,
                     "rest": rest,
-                    "one_rm": one_rm if one_rm != None else 0
+                    "one_rm": one_rm if one_rm != None else 0,
+                    "alt_ex": alt_ex
                 }
             
             return jsonify(send_data)
@@ -295,6 +297,14 @@ def get_exercises():
             print("Something went wrong")
         finally:
             conn.close()
+
+def get_other_exs(title):
+    alt_ex = {title}
+    while len(alt_ex) < 5:
+        ex = GenerateWorkout.get_recommendations(title)["Title"]
+        alt_ex.add(ex)
+
+    return list(alt_ex)
 
 def get_max_one_rm(user_id, exercise_name):
     conn = sql.connect("sql.db")
@@ -317,6 +327,34 @@ def get_max_one_rm(user_id, exercise_name):
     finally:
         if conn:
             conn.close()
+
+@app.route("/update_ex", methods=["PUT"])
+def update_day():
+    data = request.get_json()
+
+    if request.method == "PUT":
+        user_id = data.get("user_id")
+        title = data.get("title")
+        ex_id = data.get("ex_id")
+
+        conn = sql.connect("sql.db")
+        cursor = conn.cursor()
+        try:     
+            one_rm = get_max_one_rm(user_id, title)      
+            # Updates workout when changed
+            query = f"UPDATE workout_exercises SET exercise_title='{title}', one_rm={0 if one_rm is None else one_rm} WHERE exercise_id={ex_id}"
+            print(query)
+            cursor.execute(query)
+            conn.commit()
+
+            return jsonify({"success": True})
+            
+        except sql.Error as e:
+            print(f"Database error: {e}")
+            return jsonify({"success": False})
+        finally:
+            if conn:
+                conn.close()
 
 @app.route("/update_one_rm", methods=["POST"])
 def update_one_rm():

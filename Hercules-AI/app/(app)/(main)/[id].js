@@ -4,6 +4,7 @@ import { Pressable, Text, View, Alert, TextInput, StyleSheet, ScrollView } from 
 import { useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
+import { Dropdown } from 'react-native-element-dropdown';
 
 export default function Workout() {
     const router = useRouter();
@@ -12,6 +13,7 @@ export default function Workout() {
     const [exercises, setExercises] = useState([]);
     const [editedExercises, setEditedExercises] = useState({});
     const [userID, setUserID] = useState(null);
+    const [selectedExercises, setSelectedExercises] = useState({});
     const day_id = JSON.parse(dayData).day_id;
 
     useEffect( () => {
@@ -19,7 +21,11 @@ export default function Workout() {
             title: dayName
         })
 
-        const get_ex = async () => 
+        get_ex();
+
+    }, []);
+
+    const get_ex = async () => 
         {
             try {
                 const storedUser = await AsyncStorage.getItem("user");
@@ -55,15 +61,41 @@ export default function Workout() {
                 Alert.alert("Error", "Failed to load user data");
             }
         }
-        get_ex();
-
-    }, []);
 
     const handleOneRmChange = (index, value) => {
         setEditedExercises(prev => ({
             ...prev, [index]: Number(value) || 0
         }))
     }
+
+    const handleExerciseChange = async (index, item, id) => {
+        setSelectedExercises(prev => ({
+          ...prev,
+          [index]: item.value
+        }));
+
+        console.log(item)
+        
+        try {
+            const req = await fetch("http://10.0.2.2:5000/update_ex", {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({"user_id": userID, "title": item.value, "ex_id": id})
+            });
+
+            const responseData = await req.json();
+            
+        }
+        catch (err) {
+            console.log("Fetch error:", err);
+            Alert.alert("Error", "Failed to fetch exercises");
+        }finally{
+            get_ex();
+        }
+    };
+
 
     const handleStart = async () => {
         const errors = new Set();
@@ -141,30 +173,52 @@ export default function Workout() {
 
         {/* Table Rows */}
         <View style={styles.tableBody}>
-            {exercises.map((exercise, index) => (
-            <View 
-                key={index}
-                style={[
-                styles.row,
-                index % 2 === 0 ? styles.evenRow : styles.oddRow
-                ]}
-            >
-                <Text style={[styles.cellText, {flex: 3}]}>{exercise.name}</Text>
-                <Text style={[styles.cellText, {flex: 1}]}>{exercise.sets}</Text>
-                <Text style={[styles.cellText, {flex: 1}]}>{exercise.reps}</Text>
-                <Text style={[styles.cellText, {flex: 1}]}>{exercise.rest}</Text>
-                <View style={[styles.inputWrapper, {flex: 1.5}]}>
-                <TextInput 
-                    style={styles.input}
-                    keyboardType="numeric"
-                    defaultValue={exercise.one_rm?.toString()}
-                    onChangeText={(text) => handleOneRmChange(index, text)}
-                    placeholder="0"
-                />
-                <Text style={styles.unitText}>kg</Text>
+            {exercises.map((exercise, index) => {
+
+                const dropdownData = exercise.alt_ex.map(ex => ({
+                    label: ex, 
+                    value: ex
+                }));
+                console.log(exercise.id)
+                return (
+                    <View 
+                        key={index}
+                        style={[
+                        styles.row,
+                        index % 2 === 0 ? styles.evenRow : styles.oddRow
+                        ]}
+                    >
+                    <View style={[styles.cellText, {flex: 3}]}>
+                    {/* The exercises are sorted alphabetically, so after change, they will move around */}
+                    <Dropdown
+                        style={styles.dropdown}
+                        containerStyle={styles.dropdownContainer}
+                        itemTextStyle={styles.dropdownItemText}
+                        data={dropdownData}
+                        maxHeight={300}
+                        labelField="label"
+                        valueField="value"
+                        placeholder={exercise.name}
+                        value={selectedExercises[index] || exercise.name}
+                        onChange={item => handleExerciseChange(index, item, exercise.id)}
+                        activeColor="#f0f0f0"
+                    />
+                    </View>
+                    <Text style={[styles.cellText, {flex: 1}]}>{exercise.sets}</Text>
+                    <Text style={[styles.cellText, {flex: 1}]}>{exercise.reps}</Text>
+                    <Text style={[styles.cellText, {flex: 1}]}>{exercise.rest}</Text>
+                    <View style={[styles.inputWrapper, {flex: 1.5}]}>
+                    <TextInput 
+                        style={styles.input}
+                        keyboardType="numeric"
+                        defaultValue={exercise.one_rm?.toString()}
+                        onChangeText={(text) => handleOneRmChange(index, text)}
+                        placeholder="0"
+                    />
+                    <Text style={styles.unitText}>kg</Text>
+                    </View>
                 </View>
-            </View>
-            ))}
+            )})}
         </View>
 
         {/* Start Button */}
@@ -249,5 +303,25 @@ const styles = StyleSheet.create({
       fontWeight: "bold",
       fontSize: 16,
       marginRight: 8
-    }
+    },
+    exerciseDropdown: {
+        backgroundColor: 'white',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+      },
+      dropdownContainer: {
+        backgroundColor: 'white',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#ddd',
+        marginTop: 4,
+      },
+      dropdownItemText: {
+        color: '#333',
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+      },
   });

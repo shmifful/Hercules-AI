@@ -59,9 +59,13 @@ class GenerateWorkout:
     # Finds 10 similar exercises from a given exercise
     # Suggests a random one amongst them
     @classmethod
-    def get_recommendations(cls, title, level):
+    def get_recommendations(cls, title, level="Beginner"):
         similarity_matrix = cls.combined_sim
         idx = cls.indices[title]
+
+        if isinstance(idx, (pd.Series, pd.Index, list, np.ndarray)):
+            idx = idx.iloc[0]
+            
         sim_scores = list(enumerate(similarity_matrix[idx]))
         # Slightly higher suggested score if level is same as user
         sim_scores = [(i, score + 0.1 if cls.df.iloc[i]["Level"] == level else score) for i, score in sim_scores]
